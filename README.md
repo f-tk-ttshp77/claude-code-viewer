@@ -11,7 +11,7 @@ Claude Codeのセッション履歴をブラウザで閲覧・エクスポート
 ## セットアップ
 
 ```bash
-git clone https://github.com/your-username/claude-code-viewer.git
+git clone https://github.com/f-tk-ttshp77/claude-code-viewer.git
 cd claude-code-viewer
 npm install
 ```
