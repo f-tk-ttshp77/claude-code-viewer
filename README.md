@@ -1,5 +1,7 @@
 # Claude Code Viewer
 
+[English](./README.en.md)
+
 Claude Codeのセッション履歴をブラウザで閲覧・エクスポートできるWebアプリケーションです。
 
 ## こんな時に便利
