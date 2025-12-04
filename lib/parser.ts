@@ -9,6 +9,51 @@ function getClaudePath(): string {
   return path.join(process.env.HOME || '', '.claude', 'projects');
 }
 
+// Cache for project path mappings
+let projectPathCache: Map<string, string> | null = null;
+
+function getProjectPathMappings(): Map<string, string> {
+  if (projectPathCache) {
+    return projectPathCache;
+  }
+
+  projectPathCache = new Map();
+  const claudeJsonPath = path.join(process.env.HOME || '', '.claude.json');
+
+  try {
+    if (fs.existsSync(claudeJsonPath)) {
+      const content = fs.readFileSync(claudeJsonPath, 'utf-8');
+      const data = JSON.parse(content);
+
+      if (data.projects && typeof data.projects === 'object') {
+        for (const projectPath of Object.keys(data.projects)) {
+          // Encode the project path to match directory name format
+          // Claude Code encodes: / -> -, _ -> -
+          const encoded = projectPath.replace(/[/_]/g, '-');
+          projectPathCache.set(encoded, projectPath);
+        }
+      }
+    }
+  } catch {
+    // Ignore errors reading .claude.json
+  }
+
+  return projectPathCache;
+}
+
+function decodeProjectPath(encodedName: string): string {
+  const mappings = getProjectPathMappings();
+  const actualPath = mappings.get(encodedName);
+
+  if (actualPath) {
+    // Remove leading slash for display
+    return actualPath.replace(/^\//, '');
+  }
+
+  // Fallback: just return the encoded name as-is
+  return encodedName;
+}
+
 export function getDataPathInfo(): { path: string; exists: boolean; isCustom: boolean } {
   const claudePath = getClaudePath();
   return {
@@ -96,7 +141,7 @@ function parseSessionFile(filePath: string, projectName: string): Session | null
     return {
       id: path.basename(filePath, '.jsonl'),
       projectPath: projectName,
-      projectName: projectName.replace(/-/g, '/').replace(/^\//, ''),
+      projectName: decodeProjectPath(projectName),
       summary,
       firstMessageTime,
       lastMessageTime,
