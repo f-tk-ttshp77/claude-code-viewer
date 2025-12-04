@@ -8,12 +8,28 @@ Claude Codeのセッション履歴をブラウザで閲覧・エクスポート
 - セッションの内容を他の人に共有したい
 - マークダウンやコードブロックを見やすく表示したい
 
+## 動作環境
+
+- Node.js 18.17.0 以上
+
 ## セットアップ
 
 ```bash
 git clone https://github.com/f-tk-ttshp77/claude-code-viewer.git
 cd claude-code-viewer
 npm install
+```
+
+### 設定（オプション）
+
+Claude Codeのデータが標準以外の場所にある場合は、環境変数で指定できます。
+
+```bash
+# .env.example を .env にコピー
+cp .env.example .env
+
+# .env を編集してパスを設定
+CLAUDE_DATA_PATH=/path/to/your/claude/projects
 ```
 
 ## 起動方法
@@ -23,6 +39,9 @@ npm run dev
 ```
 
 http://localhost:3333 をブラウザで開いてください。
+
+> **セッションが表示されない場合**
+> アプリ画面に表示されるガイダンスに従って設定を確認してください。
 
 ## 使い方
 
