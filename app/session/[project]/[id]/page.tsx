@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import { getSession, getMessages } from '@/lib/parser';
 import { ExportButton } from '@/components/ExportButton';
+import { MarkdownRenderer } from '@/components/MarkdownRenderer';
 
 interface Props {
   params: { project: string; id: string };
@@ -61,8 +62,8 @@ export default function SessionPage({ params }: Props) {
                     {formatTime(message.timestamp)}
                   </span>
                 </div>
-                <div className="text-gray-800 whitespace-pre-wrap">
-                  {message.content}
+                <div className="text-gray-800">
+                  <MarkdownRenderer content={message.content} />
                 </div>
               </div>
             ))}
