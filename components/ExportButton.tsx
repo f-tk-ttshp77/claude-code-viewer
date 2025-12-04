@@ -42,17 +42,30 @@ export function ExportButton({ session, messages }: Props) {
 
 function generateHTML(session: Session, messages: Message[]): string {
   const messagesHTML = messages
-    .map(
-      (msg) => `
+    .map((msg, index) => {
+      const prevMessage = index > 0 ? messages[index - 1] : null;
+      const prevHasCommandMessage = prevMessage?.content.includes('<command-message>');
+      const isCommandExpansion = !!(
+        prevHasCommandMessage &&
+        msg.type === 'user' &&
+        msg.content.length > 500 &&
+        !msg.content.includes('<command-message>')
+      );
+
+      const processedContent = isCommandExpansion
+        ? `<details class="accordion"><summary>📄 コマンド展開内容（クリックで開く）</summary><div class="accordion-content">${processContent(msg.content)}</div></details>`
+        : processContent(msg.content);
+
+      return `
       <div class="message ${msg.type}">
         <div class="message-header">
           <span class="role">${msg.type === 'user' ? '👤 User' : '🤖 Claude'}</span>
           <span class="time">${formatTime(msg.timestamp)}</span>
         </div>
-        <div class="message-content">${escapeHtml(msg.content)}</div>
+        <div class="message-content">${processedContent}</div>
       </div>
-    `
-    )
+    `;
+    })
     .join('\n');
 
   return `<!DOCTYPE html>
@@ -70,7 +83,7 @@ function generateHTML(session: Session, messages: Message[]): string {
       line-height: 1.6;
       padding: 2rem;
     }
-    .container { max-width: 800px; margin: 0 auto; }
+    .container { max-width: 900px; margin: 0 auto; }
     .header {
       background: linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%);
       color: white;
@@ -83,12 +96,118 @@ function generateHTML(session: Session, messages: Message[]): string {
     .messages { background: white; border-radius: 12px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
     .message { padding: 1.5rem; border-bottom: 1px solid #f3f4f6; }
     .message:last-child { border-bottom: none; }
-    .message-header { display: flex; gap: 0.5rem; margin-bottom: 0.5rem; align-items: center; }
+    .message-header { display: flex; gap: 0.5rem; margin-bottom: 0.75rem; align-items: center; }
     .role { font-weight: 600; }
     .message.user .role { color: #2563eb; }
     .message.assistant .role { color: #16a34a; }
     .time { font-size: 0.75rem; color: #9ca3af; }
-    .message-content { white-space: pre-wrap; }
+    .message-content { line-height: 1.7; }
+
+    /* Command message styling */
+    .command-message {
+      margin: 0.75rem 0;
+      padding: 0.75rem 1rem;
+      background: #eff6ff;
+      border-left: 4px solid #3b82f6;
+      border-radius: 0 4px 4px 0;
+    }
+    .command-message-label {
+      font-size: 0.75rem;
+      color: #2563eb;
+      font-weight: 500;
+      margin-bottom: 0.25rem;
+    }
+    .command-message-content { color: #1e40af; }
+
+    .command-name {
+      display: inline-block;
+      padding: 0.25rem 0.5rem;
+      background: #f3e8ff;
+      color: #7c3aed;
+      border-radius: 4px;
+      font-family: monospace;
+      font-size: 0.875rem;
+      margin: 0.25rem 0;
+    }
+
+    /* Accordion styling */
+    .accordion {
+      border: 1px solid #e5e7eb;
+      border-radius: 8px;
+      margin: 0.5rem 0;
+      overflow: hidden;
+    }
+    .accordion summary {
+      padding: 0.75rem 1rem;
+      background: #f9fafb;
+      cursor: pointer;
+      font-weight: 500;
+      color: #374151;
+    }
+    .accordion summary:hover { background: #f3f4f6; }
+    .accordion-content {
+      padding: 1rem;
+      border-top: 1px solid #e5e7eb;
+      max-height: 500px;
+      overflow-y: auto;
+    }
+
+    /* Markdown styling */
+    .message-content h1 { font-size: 1.5rem; font-weight: bold; margin: 1rem 0 0.5rem; }
+    .message-content h2 { font-size: 1.25rem; font-weight: bold; margin: 1rem 0 0.5rem; }
+    .message-content h3 { font-size: 1.1rem; font-weight: bold; margin: 0.75rem 0 0.5rem; }
+    .message-content h4 { font-size: 1rem; font-weight: bold; margin: 0.5rem 0 0.25rem; }
+    .message-content p { margin: 0.5rem 0; }
+    .message-content ul, .message-content ol { margin: 0.5rem 0; padding-left: 1.5rem; }
+    .message-content li { margin: 0.25rem 0; }
+    .message-content strong { font-weight: 600; }
+    .message-content em { font-style: italic; }
+
+    .message-content code {
+      background: #f3f4f6;
+      padding: 0.125rem 0.375rem;
+      border-radius: 4px;
+      font-family: 'SF Mono', Monaco, Consolas, monospace;
+      font-size: 0.875em;
+    }
+    .message-content pre {
+      background: #1e293b;
+      color: #e2e8f0;
+      padding: 1rem;
+      border-radius: 8px;
+      overflow-x: auto;
+      margin: 0.75rem 0;
+    }
+    .message-content pre code {
+      background: none;
+      padding: 0;
+      color: inherit;
+    }
+    .message-content blockquote {
+      border-left: 4px solid #d1d5db;
+      padding-left: 1rem;
+      margin: 0.5rem 0;
+      color: #6b7280;
+    }
+    .message-content table {
+      border-collapse: collapse;
+      width: 100%;
+      margin: 0.75rem 0;
+    }
+    .message-content th, .message-content td {
+      border: 1px solid #d1d5db;
+      padding: 0.5rem 0.75rem;
+      text-align: left;
+    }
+    .message-content th { background: #f9fafb; font-weight: 600; }
+    .message-content a { color: #2563eb; text-decoration: underline; }
+    .message-content hr { border: none; border-top: 1px solid #e5e7eb; margin: 1rem 0; }
+
+    /* Checkbox styling */
+    .message-content input[type="checkbox"] {
+      margin-right: 0.5rem;
+    }
+
     .footer { text-align: center; padding: 2rem; color: #9ca3af; font-size: 0.875rem; }
   </style>
 </head>
@@ -113,10 +232,113 @@ function generateHTML(session: Session, messages: Message[]): string {
 </html>`;
 }
 
+function processContent(content: string): string {
+  // First escape HTML
+  let processed = escapeHtml(content);
+
+  // Parse escaped XML tags (they are now &lt;tag&gt;)
+  processed = parseXmlTags(processed);
+
+  // Convert markdown to HTML
+  processed = markdownToHtml(processed);
+
+  return processed;
+}
+
+function parseXmlTags(content: string): string {
+  let result = content;
+
+  // Parse &lt;command-message&gt; tags (escaped)
+  result = result.replace(
+    /&lt;command-message[^&]*&gt;([\s\S]*?)&lt;\/command-message&gt;/gi,
+    '<div class="command-message"><div class="command-message-label">コマンドメッセージ</div><div class="command-message-content">$1</div></div>'
+  );
+
+  // Parse &lt;command-name&gt; tags
+  result = result.replace(
+    /&lt;command-name[^&]*&gt;([\s\S]*?)&lt;\/command-name&gt;/gi,
+    '<span class="command-name">$1</span>'
+  );
+
+  // Parse &lt;command-args&gt; tags
+  result = result.replace(
+    /&lt;command-args[^&]*&gt;([\s\S]*?)&lt;\/command-args&gt;/gi,
+    '<span class="command-args">$1</span>'
+  );
+
+  // Remove other XML-like tags that shouldn't be displayed (antml, function_results, etc.)
+  result = result.replace(/&lt;antml:[^&]+&gt;[\s\S]*?&lt;\/antml:[^&]+&gt;/gi, '');
+  result = result.replace(/&lt;function_results&gt;[\s\S]*?&lt;\/function_results&gt;/gi, '');
+  result = result.replace(/&lt;system-reminder&gt;[\s\S]*?&lt;\/system-reminder&gt;/gi, '');
+
+  return result;
+}
+
+function markdownToHtml(text: string): string {
+  let html = text;
+
+  // Code blocks (must be before inline code)
+  html = html.replace(/```(\w*)\n([\s\S]*?)```/g, (_, lang, code) => {
+    return `<pre><code class="language-${lang}">${code.trim()}</code></pre>`;
+  });
+
+  // Inline code
+  html = html.replace(/`([^`]+)`/g, '<code>$1</code>');
+
+  // Headers
+  html = html.replace(/^#### (.+)$/gm, '<h4>$1</h4>');
+  html = html.replace(/^### (.+)$/gm, '<h3>$1</h3>');
+  html = html.replace(/^## (.+)$/gm, '<h2>$1</h2>');
+  html = html.replace(/^# (.+)$/gm, '<h1>$1</h1>');
+
+  // Bold and italic
+  html = html.replace(/\*\*\*(.+?)\*\*\*/g, '<strong><em>$1</em></strong>');
+  html = html.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
+  html = html.replace(/\*(.+?)\*/g, '<em>$1</em>');
+
+  // Links
+  html = html.replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2" target="_blank">$1</a>');
+
+  // Blockquotes
+  html = html.replace(/^&gt; (.+)$/gm, '<blockquote>$1</blockquote>');
+
+  // Horizontal rules
+  html = html.replace(/^---$/gm, '<hr>');
+
+  // Checkboxes
+  html = html.replace(/^\s*- \[x\] (.+)$/gm, '<li><input type="checkbox" checked disabled> $1</li>');
+  html = html.replace(/^\s*- \[ \] (.+)$/gm, '<li><input type="checkbox" disabled> $1</li>');
+
+  // Unordered lists
+  html = html.replace(/^\s*[-*] (.+)$/gm, '<li>$1</li>');
+
+  // Numbered lists
+  html = html.replace(/^\s*\d+\. (.+)$/gm, '<li>$1</li>');
+
+  // Wrap consecutive <li> elements in <ul>
+  html = html.replace(/(<li>[\s\S]*?<\/li>\n?)+/g, (match) => {
+    return `<ul>${match}</ul>`;
+  });
+
+  // Paragraphs (lines that aren't already wrapped)
+  html = html.replace(/^(?!<[a-z]|$)(.+)$/gm, '<p>$1</p>');
+
+  // Clean up empty paragraphs
+  html = html.replace(/<p>\s*<\/p>/g, '');
+
+  // Line breaks
+  html = html.replace(/\n\n/g, '\n');
+
+  return html;
+}
+
 function escapeHtml(text: string): string {
-  const div = document.createElement('div');
-  div.textContent = text;
-  return div.innerHTML;
+  return text
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#039;');
 }
 
 function formatTime(isoString: string): string {
