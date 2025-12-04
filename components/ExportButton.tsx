@@ -274,6 +274,79 @@ function parseXmlTags(content: string): string {
   return result;
 }
 
+function parseGfmTables(text: string): string {
+  const lines = text.split('\n');
+  const result: string[] = [];
+  let i = 0;
+
+  while (i < lines.length) {
+    const line = lines[i];
+
+    // Check if this line looks like a table row (starts and ends with |, or contains | between content)
+    if (line.includes('|') && i + 1 < lines.length) {
+      const nextLine = lines[i + 1];
+
+      // Check if next line is a separator row (contains |, -, and optionally :)
+      if (/^\|?[\s\-:|]+\|?$/.test(nextLine) && nextLine.includes('-')) {
+        // This is a table! Parse it
+        const tableLines: string[] = [line];
+        let j = i + 1;
+
+        // Collect all table rows
+        while (j < lines.length && lines[j].includes('|')) {
+          tableLines.push(lines[j]);
+          j++;
+        }
+
+        // Convert to HTML table
+        const tableHtml = convertTableToHtml(tableLines);
+        result.push(tableHtml);
+        i = j;
+        continue;
+      }
+    }
+
+    result.push(line);
+    i++;
+  }
+
+  return result.join('\n');
+}
+
+function convertTableToHtml(lines: string[]): string {
+  if (lines.length < 2) return lines.join('\n');
+
+  const parseRow = (row: string): string[] => {
+    return row
+      .split('|')
+      .map((cell) => cell.trim())
+      .filter((_, idx, arr) => idx > 0 && idx < arr.length - 1 || (arr.length === 2 && idx === 0));
+  };
+
+  const headerCells = parseRow(lines[0]);
+  // Skip separator line (lines[1])
+  const bodyRows = lines.slice(2).map(parseRow);
+
+  let html = '<table>\n<thead>\n<tr>\n';
+  headerCells.forEach((cell) => {
+    html += `<th>${cell}</th>\n`;
+  });
+  html += '</tr>\n</thead>\n<tbody>\n';
+
+  bodyRows.forEach((row) => {
+    if (row.length > 0 && row.some((cell) => cell.length > 0)) {
+      html += '<tr>\n';
+      row.forEach((cell) => {
+        html += `<td>${cell}</td>\n`;
+      });
+      html += '</tr>\n';
+    }
+  });
+
+  html += '</tbody>\n</table>';
+  return html;
+}
+
 function markdownToHtml(text: string): string {
   let html = text;
 
@@ -281,6 +354,9 @@ function markdownToHtml(text: string): string {
   html = html.replace(/```(\w*)\n([\s\S]*?)```/g, (_, lang, code) => {
     return `<pre><code class="language-${lang}">${code.trim()}</code></pre>`;
   });
+
+  // GFM Tables (must be before other processing)
+  html = parseGfmTables(html);
 
   // Inline code
   html = html.replace(/`([^`]+)`/g, '<code>$1</code>');
