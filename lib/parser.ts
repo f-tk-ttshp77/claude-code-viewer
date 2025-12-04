@@ -2,20 +2,36 @@ import fs from 'fs';
 import path from 'path';
 import type { Session, Message, RawMessage, ContentItem } from './types';
 
-const CLAUDE_PATH = path.join(process.env.HOME || '', '.claude', 'projects');
+function getClaudePath(): string {
+  if (process.env.CLAUDE_DATA_PATH) {
+    return process.env.CLAUDE_DATA_PATH;
+  }
+  return path.join(process.env.HOME || '', '.claude', 'projects');
+}
+
+export function getDataPathInfo(): { path: string; exists: boolean; isCustom: boolean } {
+  const claudePath = getClaudePath();
+  return {
+    path: claudePath,
+    exists: fs.existsSync(claudePath),
+    isCustom: !!process.env.CLAUDE_DATA_PATH,
+  };
+}
 
 export function getProjects(): string[] {
-  if (!fs.existsSync(CLAUDE_PATH)) {
+  const claudePath = getClaudePath();
+  if (!fs.existsSync(claudePath)) {
     return [];
   }
-  return fs.readdirSync(CLAUDE_PATH).filter((name) => {
-    const fullPath = path.join(CLAUDE_PATH, name);
+  return fs.readdirSync(claudePath).filter((name) => {
+    const fullPath = path.join(claudePath, name);
     return fs.statSync(fullPath).isDirectory();
   });
 }
 
 export function getSessions(projectName: string): Session[] {
-  const projectPath = path.join(CLAUDE_PATH, projectName);
+  const claudePath = getClaudePath();
+  const projectPath = path.join(claudePath, projectName);
   if (!fs.existsSync(projectPath)) {
     return [];
   }
@@ -92,7 +108,8 @@ function parseSessionFile(filePath: string, projectName: string): Session | null
 }
 
 export function getMessages(projectName: string, sessionId: string): Message[] {
-  const filePath = path.join(CLAUDE_PATH, projectName, `${sessionId}.jsonl`);
+  const claudePath = getClaudePath();
+  const filePath = path.join(claudePath, projectName, `${sessionId}.jsonl`);
 
   if (!fs.existsSync(filePath)) {
     return [];
@@ -159,6 +176,7 @@ function extractTextContent(content: string | ContentItem[]): string {
 }
 
 export function getSession(projectName: string, sessionId: string): Session | null {
-  const filePath = path.join(CLAUDE_PATH, projectName, `${sessionId}.jsonl`);
+  const claudePath = getClaudePath();
+  const filePath = path.join(claudePath, projectName, `${sessionId}.jsonl`);
   return parseSessionFile(filePath, projectName);
 }
