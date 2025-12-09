@@ -14,26 +14,31 @@ export function ExportButton({ session, messages }: Props) {
   const exportHTML = () => {
     setIsExporting(true);
 
-    const html = generateHTML(session, messages);
-    const blob = new Blob([html], { type: 'text/html;charset=utf-8' });
-    const url = URL.createObjectURL(blob);
+    try {
+      const html = generateHTML(session, messages);
+      const blob = new Blob([html], { type: 'text/html;charset=utf-8' });
+      const url = URL.createObjectURL(blob);
 
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `claude-session-${session.id.slice(0, 8)}.html`;
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    URL.revokeObjectURL(url);
-
-    setIsExporting(false);
+      const filename = `claude-session-${session.id.slice(0, 8)}.html`;
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = filename;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    } catch (error) {
+      console.error('Export failed:', error);
+    } finally {
+      setIsExporting(false);
+    }
   };
 
   return (
     <button
       onClick={exportHTML}
       disabled={isExporting}
-      className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 disabled:opacity-50 transition-colors"
+      className="px-3 sm:px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 disabled:opacity-50 transition-colors text-sm sm:text-base whitespace-nowrap"
     >
       {isExporting ? 'Exporting...' : 'Export HTML'}
     </button>

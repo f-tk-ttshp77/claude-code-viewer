@@ -68,8 +68,8 @@ export default function Home() {
   const projects = getProjects();
 
   return (
-    <main className="max-w-4xl mx-auto p-8">
-      <h1 className="text-3xl font-bold mb-8">Claude Code Viewer</h1>
+    <main className="max-w-4xl mx-auto p-4 sm:p-8">
+      <h1 className="text-2xl sm:text-3xl font-bold mb-6 sm:mb-8">Claude Code Viewer</h1>
 
       {projects.length === 0 ? (
         <EmptyState />
@@ -90,7 +90,7 @@ export default function Home() {
                     <Link
                       key={session.id}
                       href={`/session/${project}/${session.id}`}
-                      className="block p-4 rounded-lg border border-gray-200 hover:border-blue-400 hover:bg-blue-50 transition-colors"
+                      className="block p-3 sm:p-4 rounded-lg border border-gray-200 hover:border-blue-400 hover:bg-blue-50 transition-colors"
                     >
                       <div className="font-medium text-gray-900">
                         {session.summary || 'No summary'}

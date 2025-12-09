@@ -23,21 +23,23 @@ export default function SessionPage({ params }: Props) {
   }
 
   return (
-    <main className="max-w-4xl mx-auto p-8">
+    <main className="max-w-4xl mx-auto p-4 sm:p-8">
       {/* Header */}
-      <div className="mb-6 flex items-start justify-between">
-        <div>
+      <div className="mb-4 sm:mb-6 flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
+        <div className="min-w-0 flex-1">
           <Link href="/" className="text-blue-500 hover:underline text-sm">
             ← Back
           </Link>
-          <h1 className="text-2xl font-bold mt-2">
+          <h1 className="text-xl sm:text-2xl font-bold mt-2 break-words">
             {session.summary || 'Session'}
           </h1>
-          <p className="text-gray-500 text-sm mt-1">
+          <p className="text-gray-500 text-sm mt-1 break-words">
             {session.projectName} • {formatDate(session.lastMessageTime)}
           </p>
         </div>
-        <ExportButton session={session} messages={messages} />
+        <div className="flex-shrink-0">
+          <ExportButton session={session} messages={messages} />
+        </div>
       </div>
 
       {/* Messages */}
@@ -64,7 +66,7 @@ export default function SessionPage({ params }: Props) {
               const commandName = commandMatch ? commandMatch[1] : 'command';
 
               return (
-                <div key={message.uuid} className="p-6">
+                <div key={message.uuid} className="p-4 sm:p-6">
                   <div className="flex items-center gap-2 mb-2">
                     <span
                       className={`text-sm font-medium ${
