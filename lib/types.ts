@@ -31,3 +31,38 @@ export interface ContentItem {
   text?: string;
   thinking?: string;
 }
+
+// Session Summary types
+export interface ToolCall {
+  name: string;
+  input?: Record<string, unknown>;
+  timestamp: string;
+}
+
+export type TaskPhase = 'investigation' | 'planning' | 'implementation' | 'verification' | 'immediate';
+
+export interface TaskSummary {
+  id: number;
+  userMessage: string;
+  timestamp: string;
+  phases: TaskPhase[];
+  toolCalls: ToolCall[];
+  filesRead: string[];
+  filesModified: string[];
+  filesCreated: string[];
+  commandsRun: string[];
+}
+
+export interface SessionSummary {
+  sessionId: string;
+  totalTasks: number;
+  tasks: TaskSummary[];
+  stats: {
+    filesRead: number;
+    filesModified: number;
+    filesCreated: number;
+    commandsRun: number;
+    searchCount: number;
+    webSearchCount: number;
+  };
+}
