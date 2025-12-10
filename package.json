@@ -2,8 +2,22 @@
   "name": "claude-code-viewer",
   "version": "1.0.0",
   "description": "A web application for browsing and exporting Claude Code session history",
-  "private": true,
   "license": "MIT",
+  "bin": {
+    "claude-code-viewer": "./bin/cli.js"
+  },
+  "files": [
+    "bin",
+    "app",
+    "components",
+    "lib",
+    "public",
+    "next.config.js",
+    "tailwind.config.js",
+    "postcss.config.js",
+    "tsconfig.json",
+    ".env.example"
+  ],
   "repository": {
     "type": "git",
     "url": "https://github.com/f-tk-ttshp77/claude-code-viewer.git"
