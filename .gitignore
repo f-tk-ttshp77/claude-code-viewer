@@ -40,3 +40,6 @@ coverage/
 # Misc
 .playwright-mcp/
 *.tsbuildinfo
+
+# AI Summary Cache
+.cache/

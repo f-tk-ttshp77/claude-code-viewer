@@ -1,6 +1,6 @@
 import fs from 'fs';
 import path from 'path';
-import type { Session, Message, RawMessage, ContentItem } from './types';
+import type { Session, Message, RawMessage, ContentItem, SessionSummary, TaskSummary, TaskPhase, ToolCall } from './types';
 
 function getClaudePath(): string {
   if (process.env.CLAUDE_DATA_PATH) {
@@ -224,4 +224,251 @@ export function getSession(projectName: string, sessionId: string): Session | nu
   const claudePath = getClaudePath();
   const filePath = path.join(claudePath, projectName, `${sessionId}.jsonl`);
   return parseSessionFile(filePath, projectName);
+}
+
+// Session Summary extraction
+interface RawToolUse {
+  type: 'tool_use';
+  name: string;
+  input?: Record<string, unknown>;
+}
+
+interface RawLineData {
+  type: string;
+  uuid?: string;
+  timestamp?: string;
+  message?: {
+    role: string;
+    content: string | (ContentItem | RawToolUse)[];
+  };
+}
+
+export function getSessionSummary(projectName: string, sessionId: string): SessionSummary | null {
+  const claudePath = getClaudePath();
+  const filePath = path.join(claudePath, projectName, `${sessionId}.jsonl`);
+
+  if (!fs.existsSync(filePath)) {
+    return null;
+  }
+
+  try {
+    const content = fs.readFileSync(filePath, 'utf-8');
+    const lines = content.trim().split('\n');
+
+    const tasks: TaskSummary[] = [];
+    let currentTask: TaskSummary | null = null;
+    let taskId = 0;
+
+    // Stats tracking
+    const allFilesRead = new Set<string>();
+    const allFilesModified = new Set<string>();
+    const allFilesCreated = new Set<string>();
+    let commandsRun = 0;
+    let searchCount = 0;
+    let webSearchCount = 0;
+
+    for (const line of lines) {
+      try {
+        const data = JSON.parse(line) as RawLineData;
+
+        // Detect task boundary (user message that's not a tool result)
+        if (data.type === 'user' && data.message?.content && data.timestamp) {
+          const textContent = extractUserText(data.message.content);
+
+          // Skip tool results and system messages
+          if (textContent && !textContent.startsWith('<function_results>') && !textContent.startsWith('<system-reminder>')) {
+            // Save previous task
+            if (currentTask) {
+              currentTask.phases = detectPhases(currentTask.toolCalls);
+              tasks.push(currentTask);
+            }
+
+            // Start new task
+            taskId++;
+            currentTask = {
+              id: taskId,
+              userMessage: truncateText(textContent, 200),
+              timestamp: data.timestamp,
+              phases: [],
+              toolCalls: [],
+              filesRead: [],
+              filesModified: [],
+              filesCreated: [],
+              commandsRun: [],
+            };
+          }
+        }
+
+        // Collect tool calls from assistant messages
+        if (data.type === 'assistant' && data.message?.content && data.timestamp && currentTask) {
+          const toolCalls = extractToolCalls(data.message.content, data.timestamp);
+
+          for (const tool of toolCalls) {
+            currentTask.toolCalls.push(tool);
+
+            // Categorize tool usage
+            const input = tool.input || {};
+
+            switch (tool.name) {
+              case 'Read':
+                if (input.file_path) {
+                  const filePath = extractFileName(input.file_path as string);
+                  if (!currentTask.filesRead.includes(filePath)) {
+                    currentTask.filesRead.push(filePath);
+                  }
+                  allFilesRead.add(filePath);
+                }
+                break;
+              case 'Edit':
+                if (input.file_path) {
+                  const filePath = extractFileName(input.file_path as string);
+                  if (!currentTask.filesModified.includes(filePath)) {
+                    currentTask.filesModified.push(filePath);
+                  }
+                  allFilesModified.add(filePath);
+                }
+                break;
+              case 'Write':
+                if (input.file_path) {
+                  const filePath = extractFileName(input.file_path as string);
+                  if (!currentTask.filesCreated.includes(filePath)) {
+                    currentTask.filesCreated.push(filePath);
+                  }
+                  allFilesCreated.add(filePath);
+                }
+                break;
+              case 'Bash':
+                if (input.command) {
+                  const cmd = truncateText(input.command as string, 50);
+                  currentTask.commandsRun.push(cmd);
+                  commandsRun++;
+                }
+                break;
+              case 'Glob':
+              case 'Grep':
+                searchCount++;
+                break;
+              case 'WebSearch':
+              case 'WebFetch':
+                webSearchCount++;
+                break;
+            }
+          }
+        }
+      } catch {
+        // Skip invalid JSON lines
+      }
+    }
+
+    // Don't forget the last task
+    if (currentTask) {
+      currentTask.phases = detectPhases(currentTask.toolCalls);
+      tasks.push(currentTask);
+    }
+
+    return {
+      sessionId,
+      totalTasks: tasks.length,
+      tasks,
+      stats: {
+        filesRead: allFilesRead.size,
+        filesModified: allFilesModified.size,
+        filesCreated: allFilesCreated.size,
+        commandsRun,
+        searchCount,
+        webSearchCount,
+      },
+    };
+  } catch {
+    return null;
+  }
+}
+
+function extractUserText(content: string | (ContentItem | RawToolUse)[]): string {
+  if (typeof content === 'string') {
+    return content;
+  }
+  if (Array.isArray(content)) {
+    const textParts = content
+      .filter((item): item is ContentItem => item.type === 'text' && !!item.text)
+      .map((item) => item.text!);
+    return textParts.join('\n');
+  }
+  return '';
+}
+
+function extractToolCalls(content: string | (ContentItem | RawToolUse)[], timestamp: string): ToolCall[] {
+  if (typeof content === 'string') {
+    return [];
+  }
+  if (Array.isArray(content)) {
+    return content
+      .filter((item): item is RawToolUse => item.type === 'tool_use' && 'name' in item && !!item.name)
+      .map((item) => ({
+        name: item.name,
+        input: item.input,
+        timestamp,
+      }));
+  }
+  return [];
+}
+
+function detectPhases(toolCalls: ToolCall[]): TaskPhase[] {
+  const phases: TaskPhase[] = [];
+
+  const hasInvestigation = toolCalls.some((t) =>
+    ['Read', 'Glob', 'Grep', 'Task'].includes(t.name) &&
+    (t.name !== 'Task' || (t.input as Record<string, unknown>)?.subagent_type === 'Explore')
+  );
+
+  const hasPlanning = toolCalls.some((t) =>
+    t.name === 'TodoWrite' ||
+    (t.name === 'Task' && (t.input as Record<string, unknown>)?.subagent_type === 'Plan')
+  );
+
+  const hasImplementation = toolCalls.some((t) =>
+    ['Edit', 'Write'].includes(t.name)
+  );
+
+  const hasVerification = toolCalls.some((t) =>
+    t.name === 'Bash' &&
+    typeof (t.input as Record<string, unknown>)?.command === 'string' &&
+    /(npm\s+(test|run\s+build|run\s+lint)|pytest|jest|cargo\s+test)/.test((t.input as Record<string, unknown>)?.command as string)
+  );
+
+  if (hasInvestigation) phases.push('investigation');
+  if (hasPlanning) phases.push('planning');
+  if (hasImplementation) phases.push('implementation');
+  if (hasVerification) phases.push('verification');
+
+  // If no phases detected, mark as immediate
+  if (phases.length === 0) {
+    phases.push('immediate');
+  }
+
+  return phases;
+}
+
+function extractFileName(fullPath: string): string {
+  // Extract just the filename or last part of path for display
+  const parts = fullPath.split('/');
+  if (parts.length <= 2) {
+    return fullPath;
+  }
+  // Return last 2 parts: e.g., "components/Toast.tsx"
+  return parts.slice(-2).join('/');
+}
+
+function truncateText(text: string, maxLength: number): string {
+  // Remove command-message tags and clean up
+  const cleaned = text
+    .replace(/<command-message>[\s\S]*?<\/command-message>/g, '')
+    .replace(/<command-name>[\s\S]*?<\/command-name>/g, '')
+    .replace(/<[^>]+>/g, '')
+    .trim();
+
+  if (cleaned.length <= maxLength) {
+    return cleaned;
+  }
+  return cleaned.slice(0, maxLength) + '...';
 }
