@@ -12,7 +12,7 @@ interface Props {
 
 export function MarkdownRenderer({ content }: Props) {
   return (
-    <div className="prose prose-sm max-w-none">
+    <div className="prose prose-sm max-w-none prose-code:before:content-none prose-code:after:content-none">
       <ReactMarkdown
         remarkPlugins={[remarkGfm]}
         components={{
@@ -28,7 +28,7 @@ export function MarkdownRenderer({ content }: Props) {
                 {String(children).replace(/\n$/, '')}
               </SyntaxHighlighter>
             ) : (
-              <code className={className}>
+              <code className="px-1.5 py-0.5 bg-gray-100 text-pink-600 rounded text-sm font-mono font-normal">
                 {children}
               </code>
             );
