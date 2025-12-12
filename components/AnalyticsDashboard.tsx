@@ -30,14 +30,15 @@ export function AnalyticsDashboard({ weeklyAnalytics, monthlyAnalytics, allTimeA
     allTime: 'All Time',
   };
 
-  // Calculate cost estimates
+  // Calculate cost estimates based on Claude Sonnet 4.5 API pricing
+  // Note: Max Plan users pay $200/month flat rate - this is API equivalent for reference
   const calculateCost = (analytics: TokenAnalytics) => {
     const { inputTokens, outputTokens, cacheCreationInputTokens, cacheReadInputTokens } = analytics.totalUsage;
     const inputCost = (inputTokens / 1000000) * 3;
     const outputCost = (outputTokens / 1000000) * 15;
     const cacheCreationCost = (cacheCreationInputTokens / 1000000) * 3.75;
-    const cacheReadSavings = (cacheReadInputTokens / 1000000) * 2.7;
-    return inputCost + outputCost + cacheCreationCost - cacheReadSavings;
+    const cacheReadCost = (cacheReadInputTokens / 1000000) * 0.30;
+    return inputCost + outputCost + cacheCreationCost + cacheReadCost;
   };
 
   return (
@@ -72,12 +73,12 @@ export function AnalyticsDashboard({ weeklyAnalytics, monthlyAnalytics, allTimeA
         </div>
 
         <div className="bg-zinc-900 rounded-lg p-4 border border-zinc-800">
-          <div className="text-sm text-zinc-400 mb-1">Est. Cost</div>
+          <div className="text-sm text-zinc-400 mb-1">API Equivalent</div>
           <div className="text-2xl font-bold text-emerald-400">
             ${calculateCost(currentAnalytics).toFixed(2)}
           </div>
           <div className="text-xs text-zinc-500 mt-1">
-            Based on Claude 3.5 Sonnet pricing
+            Sonnet 4.5 API pricing
           </div>
         </div>
 

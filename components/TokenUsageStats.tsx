@@ -20,16 +20,15 @@ export function formatTokenCount(count: number): string {
 
 export function TokenUsageCard({ usage, title = 'Token Usage', showDetails = true }: TokenUsageStatsProps) {
   const totalTokens = usage.inputTokens + usage.outputTokens;
-  const effectiveInputTokens = usage.inputTokens + usage.cacheCreationInputTokens - usage.cacheReadInputTokens;
 
-  // Estimate cost (approximate pricing)
-  // Claude 3.5 Sonnet: $3/1M input, $15/1M output
-  // Cache read: $0.30/1M, Cache creation: $3.75/1M
+  // Estimate cost based on Claude Sonnet 4.5 API pricing (for reference only)
+  // Max Plan users pay $200/month flat rate
+  // API pricing: Input $3/1M, Output $15/1M, Cache write $3.75/1M, Cache read $0.30/1M
   const inputCost = (usage.inputTokens / 1000000) * 3;
   const outputCost = (usage.outputTokens / 1000000) * 15;
   const cacheCreationCost = (usage.cacheCreationInputTokens / 1000000) * 3.75;
-  const cacheReadSavings = (usage.cacheReadInputTokens / 1000000) * 2.7; // Savings vs regular input
-  const totalCost = inputCost + outputCost + cacheCreationCost - cacheReadSavings;
+  const cacheReadCost = (usage.cacheReadInputTokens / 1000000) * 0.30;
+  const totalCost = inputCost + outputCost + cacheCreationCost + cacheReadCost;
 
   return (
     <div className="bg-zinc-900 rounded-lg p-4 border border-zinc-800">
@@ -45,9 +44,9 @@ export function TokenUsageCard({ usage, title = 'Token Usage', showDetails = tru
 
         <div>
           <div className="text-2xl font-bold text-emerald-400">
-            ${totalCost.toFixed(3)}
+            ${totalCost.toFixed(2)}
           </div>
-          <div className="text-xs text-zinc-500">Est. Cost</div>
+          <div className="text-xs text-zinc-500">API Equivalent</div>
         </div>
       </div>
 
