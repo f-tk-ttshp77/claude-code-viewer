@@ -30,15 +30,14 @@ export function AnalyticsDashboard({ weeklyAnalytics, monthlyAnalytics, allTimeA
     allTime: 'All Time',
   };
 
-  // Calculate cost estimates based on Claude Sonnet 4.5 API pricing
-  // Note: Max Plan users pay $200/month flat rate - this is API equivalent for reference
+  // Calculate cost estimates
   const calculateCost = (analytics: TokenAnalytics) => {
     const { inputTokens, outputTokens, cacheCreationInputTokens, cacheReadInputTokens } = analytics.totalUsage;
     const inputCost = (inputTokens / 1000000) * 3;
     const outputCost = (outputTokens / 1000000) * 15;
     const cacheCreationCost = (cacheCreationInputTokens / 1000000) * 3.75;
-    const cacheReadCost = (cacheReadInputTokens / 1000000) * 0.30;
-    return inputCost + outputCost + cacheCreationCost + cacheReadCost;
+    const cacheReadSavings = (cacheReadInputTokens / 1000000) * 2.7;
+    return inputCost + outputCost + cacheCreationCost - cacheReadSavings;
   };
 
   return (
@@ -73,12 +72,12 @@ export function AnalyticsDashboard({ weeklyAnalytics, monthlyAnalytics, allTimeA
         </div>
 
         <div className="bg-zinc-900 rounded-lg p-4 border border-zinc-800">
-          <div className="text-sm text-zinc-400 mb-1">API Equivalent</div>
+          <div className="text-sm text-zinc-400 mb-1">Est. Cost</div>
           <div className="text-2xl font-bold text-emerald-400">
             ${calculateCost(currentAnalytics).toFixed(2)}
           </div>
           <div className="text-xs text-zinc-500 mt-1">
-            Sonnet 4.5 API pricing
+            Based on Claude 3.5 Sonnet pricing
           </div>
         </div>
 
@@ -119,24 +118,24 @@ export function AnalyticsDashboard({ weeklyAnalytics, monthlyAnalytics, allTimeA
               </tr>
             </thead>
             <tbody className="text-white">
-              <tr className={`border-b border-zinc-800 ${activePeriod === 'weekly' ? 'bg-blue-900/30' : ''}`}>
-                <td className="py-2 pr-4">{activePeriod === 'weekly' && '→ '}7 Days</td>
+              <tr className="border-b border-zinc-800">
+                <td className="py-2 pr-4">7 Days</td>
                 <td className="py-2 pr-4 text-right text-blue-400">{formatTokenCount(weeklyAnalytics.totalUsage.inputTokens)}</td>
                 <td className="py-2 pr-4 text-right text-purple-400">{formatTokenCount(weeklyAnalytics.totalUsage.outputTokens)}</td>
                 <td className="py-2 pr-4 text-right">{formatTokenCount(weeklyAnalytics.totalUsage.inputTokens + weeklyAnalytics.totalUsage.outputTokens)}</td>
                 <td className="py-2 pr-4 text-right">{weeklyAnalytics.sessionStats.length}</td>
                 <td className="py-2 text-right text-emerald-400">${calculateCost(weeklyAnalytics).toFixed(2)}</td>
               </tr>
-              <tr className={`border-b border-zinc-800 ${activePeriod === 'monthly' ? 'bg-blue-900/30' : ''}`}>
-                <td className="py-2 pr-4">{activePeriod === 'monthly' && '→ '}30 Days</td>
+              <tr className="border-b border-zinc-800">
+                <td className="py-2 pr-4">30 Days</td>
                 <td className="py-2 pr-4 text-right text-blue-400">{formatTokenCount(monthlyAnalytics.totalUsage.inputTokens)}</td>
                 <td className="py-2 pr-4 text-right text-purple-400">{formatTokenCount(monthlyAnalytics.totalUsage.outputTokens)}</td>
                 <td className="py-2 pr-4 text-right">{formatTokenCount(monthlyAnalytics.totalUsage.inputTokens + monthlyAnalytics.totalUsage.outputTokens)}</td>
                 <td className="py-2 pr-4 text-right">{monthlyAnalytics.sessionStats.length}</td>
                 <td className="py-2 text-right text-emerald-400">${calculateCost(monthlyAnalytics).toFixed(2)}</td>
               </tr>
-              <tr className={activePeriod === 'allTime' ? 'bg-blue-900/30' : ''}>
-                <td className="py-2 pr-4">{activePeriod === 'allTime' && '→ '}All Time</td>
+              <tr>
+                <td className="py-2 pr-4">All Time</td>
                 <td className="py-2 pr-4 text-right text-blue-400">{formatTokenCount(allTimeAnalytics.totalUsage.inputTokens)}</td>
                 <td className="py-2 pr-4 text-right text-purple-400">{formatTokenCount(allTimeAnalytics.totalUsage.outputTokens)}</td>
                 <td className="py-2 pr-4 text-right">{formatTokenCount(allTimeAnalytics.totalUsage.inputTokens + allTimeAnalytics.totalUsage.outputTokens)}</td>

@@ -93,13 +93,13 @@ export function SessionSummaryView({ summary, projectName, sessionId, tokenStats
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div className="bg-gray-50 rounded-lg p-4">
           <h3 className="text-sm font-semibold text-gray-700 mb-3">セッション統計</h3>
-          <div className="grid grid-cols-3 sm:grid-cols-6 gap-3">
-            <StatItem emoji="📖" label="読込" value={summary.stats.filesRead} />
-            <StatItem emoji="✏️" label="変更" value={summary.stats.filesModified} />
-            <StatItem emoji="📄" label="作成" value={summary.stats.filesCreated} />
-            <StatItem emoji="⚡" label="実行" value={summary.stats.commandsRun} />
+          <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+            <StatItem emoji="📖" label="読んだファイル" value={summary.stats.filesRead} />
+            <StatItem emoji="✏️" label="変更したファイル" value={summary.stats.filesModified} />
+            <StatItem emoji="📄" label="作成したファイル" value={summary.stats.filesCreated} />
+            <StatItem emoji="⚡" label="実行コマンド" value={summary.stats.commandsRun} />
             <StatItem emoji="🔍" label="検索" value={summary.stats.searchCount} />
-            <StatItem emoji="🌐" label="Web" value={summary.stats.webSearchCount} />
+            <StatItem emoji="🌐" label="Web検索" value={summary.stats.webSearchCount} />
           </div>
         </div>
 
@@ -186,10 +186,10 @@ export function SessionSummaryView({ summary, projectName, sessionId, tokenStats
 
 function StatItem({ emoji, label, value }: { emoji: string; label: string; value: number }) {
   return (
-    <div className="flex flex-col items-center text-center">
-      <span className="text-lg">{emoji}</span>
-      <span className="text-xs text-gray-600">{label}</span>
-      <span className="text-sm font-bold text-gray-800">{value}</span>
+    <div className="flex items-center gap-2">
+      <span>{emoji}</span>
+      <span className="text-xs text-gray-600">{label}:</span>
+      <span className="text-sm font-medium text-gray-800">{value}</span>
     </div>
   );
 }
