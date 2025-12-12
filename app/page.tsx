@@ -1,5 +1,16 @@
 import Link from 'next/link';
-import { getProjects, getSessions, getDataPathInfo } from '@/lib/parser';
+import { getProjects, getSessions, getDataPathInfo, getAllTokenStats } from '@/lib/parser';
+import type { SessionTokenStats } from '@/lib/types';
+
+function formatTokenCount(count: number): string {
+  if (count >= 1000000) {
+    return `${(count / 1000000).toFixed(1)}M`;
+  }
+  if (count >= 1000) {
+    return `${(count / 1000).toFixed(1)}K`;
+  }
+  return count.toLocaleString();
+}
 
 function EmptyState() {
   const pathInfo = getDataPathInfo();
@@ -66,6 +77,13 @@ CLAUDE_DATA_PATH=/path/to/your/claude/projects`}
 
 export default function Home() {
   const projects = getProjects();
+  const allTokenStats = getAllTokenStats();
+
+  // Create a map for quick lookup by sessionId
+  const tokenStatsMap = new Map<string, SessionTokenStats>();
+  for (const stats of allTokenStats) {
+    tokenStatsMap.set(stats.sessionId, stats);
+  }
 
   return (
     <main className="max-w-4xl mx-auto p-4 sm:p-8">
@@ -97,20 +115,41 @@ export default function Home() {
                 </h2>
 
                 <div className="space-y-2">
-                  {sessions.map((session) => (
-                    <Link
-                      key={session.id}
-                      href={`/session/${project}/${session.id}`}
-                      className="block p-3 sm:p-4 rounded-lg border border-gray-200 hover:border-blue-400 hover:bg-blue-50 transition-colors"
-                    >
-                      <div className="font-medium text-gray-900">
-                        {session.summary || 'No summary'}
-                      </div>
-                      <div className="text-sm text-gray-500 mt-1">
-                        {formatDate(session.lastMessageTime)}
-                      </div>
-                    </Link>
-                  ))}
+                  {sessions.map((session) => {
+                    const tokenStats = tokenStatsMap.get(session.id);
+                    const totalTokens = tokenStats
+                      ? tokenStats.usage.inputTokens + tokenStats.usage.outputTokens
+                      : 0;
+
+                    return (
+                      <Link
+                        key={session.id}
+                        href={`/session/${project}/${session.id}`}
+                        className="block p-3 sm:p-4 rounded-lg border border-gray-200 hover:border-blue-400 hover:bg-blue-50 transition-colors"
+                      >
+                        <div className="flex items-start justify-between gap-2">
+                          <div className="flex-1 min-w-0">
+                            <div className="font-medium text-gray-900 truncate">
+                              {session.summary || 'No summary'}
+                            </div>
+                            <div className="text-sm text-gray-500 mt-1">
+                              {formatDate(session.lastMessageTime)}
+                            </div>
+                          </div>
+                          {tokenStats && totalTokens > 0 && (
+                            <div className="flex-shrink-0 text-right">
+                              <div className="text-sm font-medium text-gray-700">
+                                {formatTokenCount(totalTokens)}
+                              </div>
+                              <div className="text-xs text-gray-400">
+                                tokens
+                              </div>
+                            </div>
+                          )}
+                        </div>
+                      </Link>
+                    );
+                  })}
                 </div>
               </div>
             );
