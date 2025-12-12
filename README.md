@@ -16,12 +16,49 @@ Claude Codeのセッション履歴をブラウザで閲覧・エクスポート
 
 - Node.js 18.17.0 以上
 
-## セットアップ
+## クイックスタート（npx）
+
+インストール不要で、すぐに起動できます：
+
+```bash
+npx claude-code-viewer
+```
+
+ブラウザも自動で開く場合：
+
+```bash
+npx claude-code-viewer --open
+```
+
+### オプション
+
+```
+-p, --port <port>   ポート番号を指定（デフォルト: 3333）
+-d, --data <path>   Claude Codeデータのパスを指定
+-o, --open          ブラウザを自動で開く
+-h, --help          ヘルプを表示
+-v, --version       バージョンを表示
+```
+
+### 使用例
+
+```bash
+# ポート8080で起動
+npx claude-code-viewer --port 8080
+
+# カスタムデータパスを指定してブラウザも開く
+npx claude-code-viewer -d /path/to/claude/data -p 4000 --open
+```
+
+## セットアップ（開発者向け）
+
+ソースからインストールする場合：
 
 ```bash
 git clone https://github.com/f-tk-ttshp77/claude-code-viewer.git
 cd claude-code-viewer
 npm install
+npm run dev
 ```
 
 ### 設定（オプション）
@@ -34,12 +71,6 @@ cp .env.example .env
 
 # .env を編集してパスを設定
 CLAUDE_DATA_PATH=/path/to/your/claude/projects
-```
-
-## 起動方法
-
-```bash
-npm run dev
 ```
 
 http://localhost:3333 をブラウザで開いてください。

@@ -14,12 +14,49 @@ A web application for browsing and exporting Claude Code session history in your
 
 - Node.js 18.17.0 or later
 
-## Setup
+## Quick Start (npx)
+
+No installation required. Just run:
+
+```bash
+npx claude-code-viewer
+```
+
+To automatically open the browser:
+
+```bash
+npx claude-code-viewer --open
+```
+
+### Options
+
+```
+-p, --port <port>   Port to run the server on (default: 3333)
+-d, --data <path>   Path to Claude Code data directory
+-o, --open          Open browser automatically
+-h, --help          Show help message
+-v, --version       Show version number
+```
+
+### Examples
+
+```bash
+# Run on port 8080
+npx claude-code-viewer --port 8080
+
+# Specify custom data path and open browser
+npx claude-code-viewer -d /path/to/claude/data -p 4000 --open
+```
+
+## Setup (For Developers)
+
+To install from source:
 
 ```bash
 git clone https://github.com/f-tk-ttshp77/claude-code-viewer.git
 cd claude-code-viewer
 npm install
+npm run dev
 ```
 
 ### Configuration (Optional)
@@ -32,12 +69,6 @@ cp .env.example .env
 
 # Edit .env to set the path
 CLAUDE_DATA_PATH=/path/to/your/claude/projects
-```
-
-## Running the Application
-
-```bash
-npm run dev
 ```
 
 Open http://localhost:3333 in your browser.
