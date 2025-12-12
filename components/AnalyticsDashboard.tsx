@@ -119,24 +119,24 @@ export function AnalyticsDashboard({ weeklyAnalytics, monthlyAnalytics, allTimeA
               </tr>
             </thead>
             <tbody className="text-white">
-              <tr className="border-b border-zinc-800">
-                <td className="py-2 pr-4">7 Days</td>
+              <tr className={`border-b border-zinc-800 ${activePeriod === 'weekly' ? 'bg-blue-900/30' : ''}`}>
+                <td className="py-2 pr-4">{activePeriod === 'weekly' && '→ '}7 Days</td>
                 <td className="py-2 pr-4 text-right text-blue-400">{formatTokenCount(weeklyAnalytics.totalUsage.inputTokens)}</td>
                 <td className="py-2 pr-4 text-right text-purple-400">{formatTokenCount(weeklyAnalytics.totalUsage.outputTokens)}</td>
                 <td className="py-2 pr-4 text-right">{formatTokenCount(weeklyAnalytics.totalUsage.inputTokens + weeklyAnalytics.totalUsage.outputTokens)}</td>
                 <td className="py-2 pr-4 text-right">{weeklyAnalytics.sessionStats.length}</td>
                 <td className="py-2 text-right text-emerald-400">${calculateCost(weeklyAnalytics).toFixed(2)}</td>
               </tr>
-              <tr className="border-b border-zinc-800">
-                <td className="py-2 pr-4">30 Days</td>
+              <tr className={`border-b border-zinc-800 ${activePeriod === 'monthly' ? 'bg-blue-900/30' : ''}`}>
+                <td className="py-2 pr-4">{activePeriod === 'monthly' && '→ '}30 Days</td>
                 <td className="py-2 pr-4 text-right text-blue-400">{formatTokenCount(monthlyAnalytics.totalUsage.inputTokens)}</td>
                 <td className="py-2 pr-4 text-right text-purple-400">{formatTokenCount(monthlyAnalytics.totalUsage.outputTokens)}</td>
                 <td className="py-2 pr-4 text-right">{formatTokenCount(monthlyAnalytics.totalUsage.inputTokens + monthlyAnalytics.totalUsage.outputTokens)}</td>
                 <td className="py-2 pr-4 text-right">{monthlyAnalytics.sessionStats.length}</td>
                 <td className="py-2 text-right text-emerald-400">${calculateCost(monthlyAnalytics).toFixed(2)}</td>
               </tr>
-              <tr>
-                <td className="py-2 pr-4">All Time</td>
+              <tr className={activePeriod === 'allTime' ? 'bg-blue-900/30' : ''}>
+                <td className="py-2 pr-4">{activePeriod === 'allTime' && '→ '}All Time</td>
                 <td className="py-2 pr-4 text-right text-blue-400">{formatTokenCount(allTimeAnalytics.totalUsage.inputTokens)}</td>
                 <td className="py-2 pr-4 text-right text-purple-400">{formatTokenCount(allTimeAnalytics.totalUsage.outputTokens)}</td>
                 <td className="py-2 pr-4 text-right">{formatTokenCount(allTimeAnalytics.totalUsage.inputTokens + allTimeAnalytics.totalUsage.outputTokens)}</td>

@@ -103,25 +103,24 @@ export function TokenUsageBarChart({ dailyStats, maxDays = 14 }: TokenUsageBarCh
       <div className="flex items-end gap-1 h-32">
         {displayStats.map((day) => {
           const totalTokens = day.usage.inputTokens + day.usage.outputTokens;
-          const height = maxTokens > 0 ? (totalTokens / maxTokens) * 100 : 0;
+          const heightPercent = maxTokens > 0 ? (totalTokens / maxTokens) * 100 : 0;
           const inputRatio = totalTokens > 0 ? (day.usage.inputTokens / totalTokens) * 100 : 50;
 
           return (
             <div
               key={day.date}
-              className="flex-1 flex flex-col items-center group relative"
+              className="flex-1 h-full flex flex-col justify-end items-center group relative"
             >
               <div
-                className="w-full rounded-t flex flex-col justify-end overflow-hidden"
-                style={{ height: `${Math.max(height, 2)}%` }}
+                className="w-full rounded-t overflow-hidden flex flex-col"
+                style={{ height: `${Math.max(heightPercent, 4)}%` }}
               >
                 <div
-                  className="bg-blue-500 w-full"
+                  className="bg-blue-500 w-full flex-shrink-0"
                   style={{ height: `${inputRatio}%` }}
                 />
                 <div
-                  className="bg-purple-500 w-full"
-                  style={{ height: `${100 - inputRatio}%` }}
+                  className="bg-purple-500 w-full flex-1"
                 />
               </div>
 
