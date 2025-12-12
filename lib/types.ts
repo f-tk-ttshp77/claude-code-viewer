@@ -66,3 +66,34 @@ export interface SessionSummary {
     webSearchCount: number;
   };
 }
+
+// Token Usage types
+export interface TokenUsage {
+  inputTokens: number;
+  outputTokens: number;
+  cacheCreationInputTokens: number;
+  cacheReadInputTokens: number;
+}
+
+export interface SessionTokenStats {
+  sessionId: string;
+  projectName: string;
+  projectPath: string;
+  timestamp: string;
+  usage: TokenUsage;
+  model?: string;
+}
+
+export interface DailyTokenStats {
+  date: string;
+  usage: TokenUsage;
+  sessionCount: number;
+}
+
+export interface TokenAnalytics {
+  totalUsage: TokenUsage;
+  dailyStats: DailyTokenStats[];
+  sessionStats: SessionTokenStats[];
+  periodStart: string;
+  periodEnd: string;
+}

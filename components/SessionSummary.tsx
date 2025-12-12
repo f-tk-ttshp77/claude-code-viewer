@@ -1,7 +1,8 @@
 'use client';
 
 import { useState } from 'react';
-import type { SessionSummary, TaskPhase } from '@/lib/types';
+import type { SessionSummary, TaskPhase, SessionTokenStats } from '@/lib/types';
+import { TokenUsageCard } from './TokenUsageStats';
 
 interface AISummary {
   sessionSummary: string;
@@ -13,6 +14,7 @@ interface Props {
   summary: SessionSummary;
   projectName: string;
   sessionId: string;
+  tokenStats?: SessionTokenStats | null;
 }
 
 const phaseLabels: Record<TaskPhase, { label: string; emoji: string }> = {
@@ -23,7 +25,7 @@ const phaseLabels: Record<TaskPhase, { label: string; emoji: string }> = {
   immediate: { label: '即答', emoji: '⚡' },
 };
 
-export function SessionSummaryView({ summary, projectName, sessionId }: Props) {
+export function SessionSummaryView({ summary, projectName, sessionId, tokenStats }: Props) {
   const [aiSummary, setAiSummary] = useState<AISummary | null>(null);
   const [isGenerating, setIsGenerating] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -88,16 +90,26 @@ export function SessionSummaryView({ summary, projectName, sessionId }: Props) {
       </div>
 
       {/* Stats Overview */}
-      <div className="bg-gray-50 rounded-lg p-4">
-        <h3 className="text-sm font-semibold text-gray-700 mb-3">セッション統計</h3>
-        <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
-          <StatItem emoji="📖" label="読んだファイル" value={summary.stats.filesRead} />
-          <StatItem emoji="✏️" label="変更したファイル" value={summary.stats.filesModified} />
-          <StatItem emoji="📄" label="作成したファイル" value={summary.stats.filesCreated} />
-          <StatItem emoji="⚡" label="実行コマンド" value={summary.stats.commandsRun} />
-          <StatItem emoji="🔍" label="検索" value={summary.stats.searchCount} />
-          <StatItem emoji="🌐" label="Web検索" value={summary.stats.webSearchCount} />
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div className="bg-gray-50 rounded-lg p-4">
+          <h3 className="text-sm font-semibold text-gray-700 mb-3">セッション統計</h3>
+          <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+            <StatItem emoji="📖" label="読んだファイル" value={summary.stats.filesRead} />
+            <StatItem emoji="✏️" label="変更したファイル" value={summary.stats.filesModified} />
+            <StatItem emoji="📄" label="作成したファイル" value={summary.stats.filesCreated} />
+            <StatItem emoji="⚡" label="実行コマンド" value={summary.stats.commandsRun} />
+            <StatItem emoji="🔍" label="検索" value={summary.stats.searchCount} />
+            <StatItem emoji="🌐" label="Web検索" value={summary.stats.webSearchCount} />
+          </div>
         </div>
+
+        {/* Token Usage */}
+        {tokenStats && (
+          <TokenUsageCard
+            usage={tokenStats.usage}
+            title={`Token Usage${tokenStats.model ? ` (${tokenStats.model.replace('claude-', '').replace(/-\d+$/, '')})` : ''}`}
+          />
+        )}
       </div>
 
       {/* Tasks */}

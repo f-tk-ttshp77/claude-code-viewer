@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import { getSession, getMessages, getSessionSummary } from '@/lib/parser';
+import { getSession, getMessages, getSessionSummary, getSessionTokenStats } from '@/lib/parser';
 import { ExportButton } from '@/components/ExportButton';
 import { SessionContent } from '@/components/SessionContent';
 
@@ -11,6 +11,7 @@ export default function SessionPage({ params }: Props) {
   const session = getSession(params.project, params.id);
   const messages = getMessages(params.project, params.id);
   const summary = getSessionSummary(params.project, params.id);
+  const tokenStats = getSessionTokenStats(params.project, params.id);
 
   if (!session) {
     return (
@@ -49,6 +50,7 @@ export default function SessionPage({ params }: Props) {
         summary={summary}
         projectName={params.project}
         sessionId={params.id}
+        tokenStats={tokenStats}
       />
     </main>
   );
