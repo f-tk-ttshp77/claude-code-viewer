@@ -1,6 +1,6 @@
 import fs from 'fs';
 import path from 'path';
-import type { Session, Message, RawMessage, ContentItem, SessionSummary, TaskSummary, TaskPhase, ToolCall } from './types';
+import type { Session, Message, RawMessage, ContentItem, SessionSummary, TaskSummary, TaskPhase, ToolCall, TokenUsage, SessionTokenStats, DailyTokenStats, TokenAnalytics } from './types';
 
 function getClaudePath(): string {
   if (process.env.CLAUDE_DATA_PATH) {
@@ -471,4 +471,179 @@ function truncateText(text: string, maxLength: number): string {
     return cleaned;
   }
   return cleaned.slice(0, maxLength) + '...';
+}
+
+// Token Usage extraction
+interface RawMessageWithUsage {
+  type: string;
+  timestamp?: string;
+  message?: {
+    model?: string;
+    usage?: {
+      input_tokens?: number;
+      output_tokens?: number;
+      cache_creation_input_tokens?: number;
+      cache_read_input_tokens?: number;
+    };
+  };
+}
+
+export function getSessionTokenStats(projectName: string, sessionId: string): SessionTokenStats | null {
+  const claudePath = getClaudePath();
+  const filePath = path.join(claudePath, projectName, `${sessionId}.jsonl`);
+
+  if (!fs.existsSync(filePath)) {
+    return null;
+  }
+
+  try {
+    const content = fs.readFileSync(filePath, 'utf-8');
+    const lines = content.trim().split('\n');
+
+    let totalInputTokens = 0;
+    let totalOutputTokens = 0;
+    let totalCacheCreation = 0;
+    let totalCacheRead = 0;
+    let firstTimestamp: string | null = null;
+    let model: string | undefined;
+
+    for (const line of lines) {
+      try {
+        const data = JSON.parse(line) as RawMessageWithUsage;
+
+        if (data.type === 'assistant' && data.message?.usage) {
+          const usage = data.message.usage;
+          totalInputTokens += usage.input_tokens || 0;
+          totalOutputTokens += usage.output_tokens || 0;
+          totalCacheCreation += usage.cache_creation_input_tokens || 0;
+          totalCacheRead += usage.cache_read_input_tokens || 0;
+
+          if (!model && data.message.model) {
+            model = data.message.model;
+          }
+        }
+
+        if (data.timestamp && !firstTimestamp) {
+          firstTimestamp = data.timestamp;
+        }
+      } catch {
+        // Skip invalid JSON lines
+      }
+    }
+
+    return {
+      sessionId,
+      projectName: decodeProjectPath(projectName),
+      projectPath: projectName,
+      timestamp: firstTimestamp || new Date().toISOString(),
+      usage: {
+        inputTokens: totalInputTokens,
+        outputTokens: totalOutputTokens,
+        cacheCreationInputTokens: totalCacheCreation,
+        cacheReadInputTokens: totalCacheRead,
+      },
+      model,
+    };
+  } catch {
+    return null;
+  }
+}
+
+export function getAllTokenStats(): SessionTokenStats[] {
+  const projects = getProjects();
+  const allStats: SessionTokenStats[] = [];
+
+  for (const projectName of projects) {
+    const claudePath = getClaudePath();
+    const projectPath = path.join(claudePath, projectName);
+
+    if (!fs.existsSync(projectPath)) continue;
+
+    const files = fs.readdirSync(projectPath).filter(
+      (f) => f.endsWith('.jsonl') && !f.startsWith('agent-')
+    );
+
+    for (const file of files) {
+      const sessionId = path.basename(file, '.jsonl');
+      const stats = getSessionTokenStats(projectName, sessionId);
+      if (stats && (stats.usage.inputTokens > 0 || stats.usage.outputTokens > 0)) {
+        allStats.push(stats);
+      }
+    }
+  }
+
+  // Sort by timestamp (newest first)
+  return allStats.sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());
+}
+
+export function getTokenAnalytics(days: number = 30): TokenAnalytics {
+  const allStats = getAllTokenStats();
+  const now = new Date();
+  const periodStart = new Date(now);
+  periodStart.setDate(periodStart.getDate() - days);
+  periodStart.setHours(0, 0, 0, 0);
+
+  // Filter stats within the period
+  const filteredStats = allStats.filter((stat) => {
+    const statDate = new Date(stat.timestamp);
+    return statDate >= periodStart && statDate <= now;
+  });
+
+  // Calculate total usage
+  const totalUsage: TokenUsage = {
+    inputTokens: 0,
+    outputTokens: 0,
+    cacheCreationInputTokens: 0,
+    cacheReadInputTokens: 0,
+  };
+
+  for (const stat of filteredStats) {
+    totalUsage.inputTokens += stat.usage.inputTokens;
+    totalUsage.outputTokens += stat.usage.outputTokens;
+    totalUsage.cacheCreationInputTokens += stat.usage.cacheCreationInputTokens;
+    totalUsage.cacheReadInputTokens += stat.usage.cacheReadInputTokens;
+  }
+
+  // Group by day
+  const dailyMap = new Map<string, { usage: TokenUsage; sessionCount: number }>();
+
+  for (const stat of filteredStats) {
+    const date = new Date(stat.timestamp).toISOString().split('T')[0];
+
+    if (!dailyMap.has(date)) {
+      dailyMap.set(date, {
+        usage: {
+          inputTokens: 0,
+          outputTokens: 0,
+          cacheCreationInputTokens: 0,
+          cacheReadInputTokens: 0,
+        },
+        sessionCount: 0,
+      });
+    }
+
+    const daily = dailyMap.get(date)!;
+    daily.usage.inputTokens += stat.usage.inputTokens;
+    daily.usage.outputTokens += stat.usage.outputTokens;
+    daily.usage.cacheCreationInputTokens += stat.usage.cacheCreationInputTokens;
+    daily.usage.cacheReadInputTokens += stat.usage.cacheReadInputTokens;
+    daily.sessionCount++;
+  }
+
+  // Convert to array and sort by date
+  const dailyStats: DailyTokenStats[] = Array.from(dailyMap.entries())
+    .map(([date, data]) => ({
+      date,
+      usage: data.usage,
+      sessionCount: data.sessionCount,
+    }))
+    .sort((a, b) => a.date.localeCompare(b.date));
+
+  return {
+    totalUsage,
+    dailyStats,
+    sessionStats: filteredStats,
+    periodStart: periodStart.toISOString(),
+    periodEnd: now.toISOString(),
+  };
 }
