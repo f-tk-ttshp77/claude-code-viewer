@@ -3,13 +3,14 @@
 import { SessionTabs } from './SessionTabs';
 import { SessionSummaryView } from './SessionSummary';
 import { ContentRenderer } from './ContentRenderer';
-import type { Message, SessionSummary } from '@/lib/types';
+import type { Message, SessionSummary, SessionTokenStats } from '@/lib/types';
 
 interface Props {
   messages: Message[];
   summary: SessionSummary | null;
   projectName: string;
   sessionId: string;
+  tokenStats?: SessionTokenStats | null;
 }
 
 const tabs = [
@@ -17,7 +18,7 @@ const tabs = [
   { id: 'summary', label: 'サマリー' },
 ];
 
-export function SessionContent({ messages, summary, projectName, sessionId }: Props) {
+export function SessionContent({ messages, summary, projectName, sessionId, tokenStats }: Props) {
   return (
     <SessionTabs tabs={tabs}>
       {(activeTab) => (
@@ -80,6 +81,7 @@ export function SessionContent({ messages, summary, projectName, sessionId }: Pr
                   summary={summary}
                   projectName={projectName}
                   sessionId={sessionId}
+                  tokenStats={tokenStats}
                 />
               ) : (
                 <p className="text-gray-500">サマリーを生成できませんでした</p>
