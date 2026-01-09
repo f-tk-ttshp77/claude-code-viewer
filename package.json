@@ -2,8 +2,22 @@
   "name": "claude-code-viewer",
   "version": "1.0.0",
   "description": "A web application for browsing and exporting Claude Code session history",
-  "private": true,
+  "author": "f-tk-ttshp77",
   "license": "MIT",
+  "bin": {
+    "claude-code-viewer": "./bin/cli.js"
+  },
+  "files": [
+    "bin",
+    "app",
+    "components",
+    "lib",
+    "next.config.js",
+    "tailwind.config.js",
+    "postcss.config.js",
+    "tsconfig.json",
+    ".env.example"
+  ],
   "repository": {
     "type": "git",
     "url": "https://github.com/f-tk-ttshp77/claude-code-viewer.git"
@@ -29,22 +43,22 @@
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.71.2",
+    "@tailwindcss/typography": "^0.5.19",
+    "autoprefixer": "^10.4.0",
     "next": "^14.2.0",
+    "postcss": "^8.4.0",
     "react": "^18.3.0",
     "react-dom": "^18.3.0",
     "react-markdown": "^10.1.0",
     "react-syntax-highlighter": "^16.1.0",
-    "remark-gfm": "^4.0.1"
+    "remark-gfm": "^4.0.1",
+    "tailwindcss": "^3.4.0",
+    "typescript": "^5.4.0"
   },
   "devDependencies": {
-    "@tailwindcss/typography": "^0.5.19",
     "@types/node": "^20.0.0",
     "@types/react": "^18.3.0",
     "@types/react-dom": "^18.3.0",
-    "@types/react-syntax-highlighter": "^15.5.13",
-    "autoprefixer": "^10.4.0",
-    "postcss": "^8.4.0",
-    "tailwindcss": "^3.4.0",
-    "typescript": "^5.4.0"
+    "@types/react-syntax-highlighter": "^15.5.13"
   }
 }
