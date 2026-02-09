@@ -9,8 +9,10 @@ export function GlobalNav() {
 
   const links = [
     { href: '/', label: 'Sessions' },
+    { href: '/search', label: 'Search' },
     { href: '/analytics', label: 'Analytics' },
     { href: '/insights', label: 'Insights' },
+    { href: '/trends', label: 'Trends' },
   ];
 
   return (

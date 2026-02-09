@@ -6,7 +6,7 @@ import {
   getSessionTokenStats,
   getSessions,
 } from '@/lib/parser';
-import { ExportButton } from '@/components/ExportButton';
+import { ExportDropdown } from '@/components/ExportDropdown';
 import { SessionContent } from '@/components/SessionContent';
 import { Breadcrumb } from '@/components/Breadcrumb';
 import { ScrollToTop } from '@/components/ScrollToTop';
@@ -60,7 +60,7 @@ export default function SessionPage({ params }: Props) {
           </p>
         </div>
         <div className="flex-shrink-0">
-          <ExportButton session={session} messages={messages} />
+          <ExportDropdown projectName={params.project} sessionId={params.id} />
         </div>
       </div>
 

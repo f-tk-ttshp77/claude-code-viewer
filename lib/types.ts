@@ -103,6 +103,75 @@ export interface TokenAnalytics {
   periodEnd: string;
 }
 
+// Export types
+export type ExportFormat = 'markdown' | 'json' | 'html';
+
+export interface ExportOptions {
+  format: ExportFormat;
+  includeToolCalls?: boolean;
+  includeTokenStats?: boolean;
+}
+
+// Search types
+export interface SearchQuery {
+  query: string;
+  projectFilter?: string;
+  dateFrom?: string;
+  dateTo?: string;
+  toolFilter?: string;
+}
+
+export interface SearchMatch {
+  messageRole: 'user' | 'assistant';
+  snippet: string;
+  timestamp: string;
+  lineIndex: number;
+}
+
+export interface SearchResult {
+  sessionId: string;
+  projectName: string;
+  sessionTimestamp: string;
+  matches: SearchMatch[];
+  totalMatches: number;
+}
+
+// Trend types
+export interface TimeSeriesPoint {
+  date: string;
+  value: number;
+}
+
+export interface ActivityHeatmapCell {
+  dayOfWeek: number; // 0=Sunday, 6=Saturday
+  hour: number; // 0-23
+  count: number;
+}
+
+export interface ProjectActivity {
+  projectName: string;
+  sessionCount: number;
+  totalTokens: number;
+}
+
+export interface ToolDistribution {
+  toolName: string;
+  count: number;
+  percentage: number;
+}
+
+export interface TrendData {
+  period: { from: string; to: string; days: number };
+  sessionTimeSeries: TimeSeriesPoint[];
+  projectBreakdown: ProjectActivity[];
+  toolDistribution: ToolDistribution[];
+  activityHeatmap: ActivityHeatmapCell[];
+  complexityTrend: TimeSeriesPoint[];
+  tokenEfficiencyTrend: TimeSeriesPoint[];
+  totalSessions: number;
+  totalTokens: number;
+}
+
 // Insights types
 export interface InsightDetail {
   category: string;
