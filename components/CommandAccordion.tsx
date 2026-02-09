@@ -12,20 +12,16 @@ export function CommandAccordion({ commandName, content }: Props) {
   const [isOpen, setIsOpen] = useState(false);
 
   return (
-    <div className="border border-gray-200 rounded-lg my-2 overflow-hidden">
+    <div className="my-2 overflow-hidden rounded-lg border border-gray-200">
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="w-full px-4 py-3 bg-gray-50 hover:bg-gray-100 flex items-center justify-between text-left transition-colors"
+        className="flex w-full items-center justify-between bg-gray-50 px-4 py-3 text-left transition-colors hover:bg-gray-100"
       >
-        <span className="font-medium text-gray-700">
-          📄 {commandName} の展開内容
-        </span>
-        <span className="text-gray-500 text-sm">
-          {isOpen ? '▲ 閉じる' : '▼ 開く'}
-        </span>
+        <span className="font-medium text-gray-700">📄 {commandName} の展開内容</span>
+        <span className="text-sm text-gray-500">{isOpen ? '▲ 閉じる' : '▼ 開く'}</span>
       </button>
       {isOpen && (
-        <div className="p-4 border-t border-gray-200 bg-white max-h-96 overflow-y-auto">
+        <div className="max-h-96 overflow-y-auto border-t border-gray-200 bg-white p-4">
           <MarkdownRenderer content={content} />
         </div>
       )}

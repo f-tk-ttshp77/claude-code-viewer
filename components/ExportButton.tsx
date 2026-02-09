@@ -38,7 +38,7 @@ export function ExportButton({ session, messages }: Props) {
     <button
       onClick={exportHTML}
       disabled={isExporting}
-      className="px-3 sm:px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 disabled:opacity-50 transition-colors text-sm sm:text-base whitespace-nowrap"
+      className="whitespace-nowrap rounded-lg bg-blue-500 px-3 py-2 text-sm text-white transition-colors hover:bg-blue-600 disabled:opacity-50 sm:px-4 sm:text-base"
     >
       {isExporting ? 'Exporting...' : 'Export HTML'}
     </button>
@@ -325,7 +325,9 @@ function convertTableToHtml(lines: string[]): string {
     return row
       .split('|')
       .map((cell) => cell.trim())
-      .filter((_, idx, arr) => idx > 0 && idx < arr.length - 1 || (arr.length === 2 && idx === 0));
+      .filter(
+        (_, idx, arr) => (idx > 0 && idx < arr.length - 1) || (arr.length === 2 && idx === 0)
+      );
   };
 
   const headerCells = parseRow(lines[0]);
@@ -387,7 +389,10 @@ function markdownToHtml(text: string): string {
   html = html.replace(/^---$/gm, '<hr>');
 
   // Checkboxes
-  html = html.replace(/^\s*- \[x\] (.+)$/gm, '<li><input type="checkbox" checked disabled> $1</li>');
+  html = html.replace(
+    /^\s*- \[x\] (.+)$/gm,
+    '<li><input type="checkbox" checked disabled> $1</li>'
+  );
   html = html.replace(/^\s*- \[ \] (.+)$/gm, '<li><input type="checkbox" disabled> $1</li>');
 
   // Unordered lists

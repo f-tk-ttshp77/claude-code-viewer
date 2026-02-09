@@ -15,15 +15,34 @@ interface AISummary {
   generatedAt: string;
 }
 
+function isValidPathSegment(segment: string): boolean {
+  if (typeof segment !== 'string' || segment.length === 0 || segment.length > 512) return false;
+  if (segment.includes('..') || segment.includes('/') || segment.includes('\\')) return false;
+  if (segment.includes('\0')) return false;
+  return true;
+}
+
 export async function POST(request: NextRequest) {
   try {
-    const { projectName, sessionId } = await request.json();
+    let body: unknown;
+    try {
+      body = await request.json();
+    } catch {
+      return NextResponse.json({ error: 'Invalid JSON' }, { status: 400 });
+    }
+
+    const { projectName, sessionId } = body as { projectName: unknown; sessionId: unknown };
+
+    if (typeof projectName !== 'string' || typeof sessionId !== 'string') {
+      return NextResponse.json({ error: 'Invalid input types' }, { status: 400 });
+    }
 
     if (!projectName || !sessionId) {
-      return NextResponse.json(
-        { error: 'Missing projectName or sessionId' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'Missing projectName or sessionId' }, { status: 400 });
+    }
+
+    if (!isValidPathSegment(projectName) || !isValidPathSegment(sessionId)) {
+      return NextResponse.json({ error: 'Invalid input format' }, { status: 400 });
     }
 
     // Check cache first
@@ -35,10 +54,7 @@ export async function POST(request: NextRequest) {
     // Get structured summary data
     const structuredSummary = getSessionSummary(projectName, sessionId);
     if (!structuredSummary) {
-      return NextResponse.json(
-        { error: 'Session not found' },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: 'Session not found' }, { status: 404 });
     }
 
     // Build prompt for Claude
@@ -71,10 +87,7 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ summary: aiSummary, fromCache: false });
   } catch (error) {
     console.error('Error generating summary:', error);
-    return NextResponse.json(
-      { error: 'Failed to generate summary' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Failed to generate summary' }, { status: 500 });
   }
 }
 

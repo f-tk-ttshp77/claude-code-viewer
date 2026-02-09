@@ -28,9 +28,7 @@ export function MarkdownRenderer({ content }: Props) {
                 {String(children).replace(/\n$/, '')}
               </SyntaxHighlighter>
             ) : (
-              <code className={className}>
-                {children}
-              </code>
+              <code className={className}>{children}</code>
             );
           },
           // テーブルのスタイリング
@@ -45,15 +43,11 @@ export function MarkdownRenderer({ content }: Props) {
           },
           th({ children }) {
             return (
-              <th className="border border-gray-300 bg-gray-100 px-4 py-2 text-left">
-                {children}
-              </th>
+              <th className="border border-gray-300 bg-gray-100 px-4 py-2 text-left">{children}</th>
             );
           },
           td({ children }) {
-            return (
-              <td className="border border-gray-300 px-4 py-2">{children}</td>
-            );
+            return <td className="border border-gray-300 px-4 py-2">{children}</td>;
           },
         }}
       >

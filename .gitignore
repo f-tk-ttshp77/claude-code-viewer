@@ -43,3 +43,6 @@ coverage/
 
 # AI Summary Cache
 .cache/
+
+# ESLint
+.eslintcache

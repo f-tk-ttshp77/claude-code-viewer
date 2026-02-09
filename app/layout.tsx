@@ -5,14 +5,10 @@ export const metadata = {
   description: 'View Claude Code conversation history',
 };
 
-export default function RootLayout({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
+export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="ja">
-      <body className="bg-gray-50 min-h-screen">{children}</body>
+      <body className="min-h-screen bg-gray-50">{children}</body>
     </html>
   );
 }

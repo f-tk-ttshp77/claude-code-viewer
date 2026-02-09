@@ -23,26 +23,20 @@ export function ContentRenderer({ content, isCommandExpansion, commandName }: Pr
     <div>
       {parsedContent.map((segment, index) => (
         <div key={index}>
-          {segment.type === 'text' && (
-            <MarkdownRenderer content={segment.content} />
-          )}
+          {segment.type === 'text' && <MarkdownRenderer content={segment.content} />}
           {segment.type === 'command-message' && (
-            <div className="my-3 p-3 bg-blue-50 border-l-4 border-blue-400 rounded-r">
-              <div className="text-xs text-blue-600 font-medium mb-1">
-                コマンドメッセージ
-              </div>
-              <div className="text-blue-800">
-                {segment.content}
-              </div>
+            <div className="my-3 rounded-r border-l-4 border-blue-400 bg-blue-50 p-3">
+              <div className="mb-1 text-xs font-medium text-blue-600">コマンドメッセージ</div>
+              <div className="text-blue-800">{segment.content}</div>
             </div>
           )}
           {segment.type === 'command-name' && (
-            <span className="inline-block px-2 py-1 bg-purple-100 text-purple-700 rounded font-mono text-sm">
+            <span className="inline-block rounded bg-purple-100 px-2 py-1 font-mono text-sm text-purple-700">
               {segment.content}
             </span>
           )}
           {segment.type === 'command-args' && (
-            <span className="inline-block px-2 py-1 bg-gray-100 text-gray-700 rounded font-mono text-sm ml-1">
+            <span className="ml-1 inline-block rounded bg-gray-100 px-2 py-1 font-mono text-sm text-gray-700">
               {segment.content}
             </span>
           )}
@@ -59,7 +53,13 @@ export function ContentRenderer({ content, isCommandExpansion, commandName }: Pr
 }
 
 interface ContentSegment {
-  type: 'text' | 'command-message' | 'command-name' | 'command-args' | 'antml-function-calls' | 'function-results';
+  type:
+    | 'text'
+    | 'command-message'
+    | 'command-name'
+    | 'command-args'
+    | 'antml-function-calls'
+    | 'function-results';
   content: string;
 }
 
@@ -78,7 +78,12 @@ function parseXmlTags(content: string): ContentSegment[] {
   let remaining = content;
 
   while (remaining.length > 0) {
-    let earliestMatch: { index: number; length: number; type: ContentSegment['type']; innerContent: string } | null = null;
+    let earliestMatch: {
+      index: number;
+      length: number;
+      type: ContentSegment['type'];
+      innerContent: string;
+    } | null = null;
 
     for (const { tag, type } of tagPatterns) {
       const regex = new RegExp(`<${tag}[^>]*>([\\s\\S]*?)</${tag}>`, 'i');
@@ -146,7 +151,7 @@ function FunctionCallsRenderer({ content }: { content: string }) {
 
   if (invokes.length === 0) {
     return (
-      <div className="my-3 p-3 bg-yellow-50 border border-yellow-200 rounded text-sm font-mono">
+      <div className="my-3 rounded border border-yellow-200 bg-yellow-50 p-3 font-mono text-sm">
         {content}
       </div>
     );
@@ -155,17 +160,17 @@ function FunctionCallsRenderer({ content }: { content: string }) {
   return (
     <div className="my-3 space-y-2">
       {invokes.map((invoke, idx) => (
-        <div key={idx} className="border border-orange-200 rounded-lg overflow-hidden">
-          <div className="px-3 py-2 bg-orange-50 border-b border-orange-200 flex items-center gap-2">
+        <div key={idx} className="overflow-hidden rounded-lg border border-orange-200">
+          <div className="flex items-center gap-2 border-b border-orange-200 bg-orange-50 px-3 py-2">
             <span className="text-orange-600">🔧</span>
             <span className="font-medium text-orange-800">{invoke.name}</span>
           </div>
           {invoke.params.length > 0 && (
-            <div className="p-3 bg-white text-sm">
+            <div className="bg-white p-3 text-sm">
               {invoke.params.map((param, pIdx) => (
                 <div key={pIdx} className="mb-2 last:mb-0">
-                  <div className="text-xs text-gray-500 mb-1">{param.name}:</div>
-                  <pre className="bg-gray-50 p-2 rounded text-xs overflow-x-auto whitespace-pre-wrap break-all">
+                  <div className="mb-1 text-xs text-gray-500">{param.name}:</div>
+                  <pre className="overflow-x-auto whitespace-pre-wrap break-all rounded bg-gray-50 p-2 text-xs">
                     {param.value.length > 500 ? param.value.slice(0, 500) + '...' : param.value}
                   </pre>
                 </div>
@@ -183,12 +188,12 @@ function FunctionResultsRenderer({ content }: { content: string }) {
   const truncated = content.length > 1000 ? content.slice(0, 1000) + '\n... (truncated)' : content;
 
   return (
-    <div className="my-3 border border-green-200 rounded-lg overflow-hidden">
-      <div className="px-3 py-2 bg-green-50 border-b border-green-200 flex items-center gap-2">
+    <div className="my-3 overflow-hidden rounded-lg border border-green-200">
+      <div className="flex items-center gap-2 border-b border-green-200 bg-green-50 px-3 py-2">
         <span className="text-green-600">✓</span>
         <span className="font-medium text-green-800">実行結果</span>
       </div>
-      <pre className="p-3 bg-white text-sm overflow-x-auto whitespace-pre-wrap break-all max-h-48 overflow-y-auto">
+      <pre className="max-h-48 overflow-x-auto overflow-y-auto whitespace-pre-wrap break-all bg-white p-3 text-sm">
         {truncated}
       </pre>
     </div>
