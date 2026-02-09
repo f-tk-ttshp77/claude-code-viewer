@@ -17,6 +17,10 @@ function buildBreadcrumbs(pathname: string): BreadcrumbItem[] {
     return [{ label: 'Home', href: '/' }, { label: 'Analytics' }];
   }
 
+  if (pathname === '/insights') {
+    return [{ label: 'Home', href: '/' }, { label: 'Insights' }];
+  }
+
   // /session/[project]/[id]
   const sessionMatch = pathname.match(/^\/session\/([^/]+)\/([^/]+)/);
   if (sessionMatch) {

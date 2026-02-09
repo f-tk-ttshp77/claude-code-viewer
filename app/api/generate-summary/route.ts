@@ -1,10 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server';
-import Anthropic from '@anthropic-ai/sdk';
+import { execFile } from 'child_process';
+import { promisify } from 'util';
 import fs from 'fs';
 import path from 'path';
 import { getSessionSummary } from '@/lib/parser';
 
-const anthropic = new Anthropic();
+const execFileAsync = promisify(execFile);
 
 // Cache directory for AI summaries
 const CACHE_DIR = path.join(process.cwd(), '.cache', 'summaries');
@@ -60,23 +61,8 @@ export async function POST(request: NextRequest) {
     // Build prompt for Claude
     const prompt = buildPrompt(structuredSummary);
 
-    // Call Claude API
-    const message = await anthropic.messages.create({
-      model: 'claude-3-haiku-20240307',
-      max_tokens: 1024,
-      messages: [
-        {
-          role: 'user',
-          content: prompt,
-        },
-      ],
-    });
-
-    // Extract text response
-    const responseText = message.content
-      .filter((block): block is Anthropic.TextBlock => block.type === 'text')
-      .map((block) => block.text)
-      .join('\n');
+    // Call local Claude CLI instead of API
+    const responseText = await callClaudeCLI(prompt);
 
     // Parse the response
     const aiSummary = parseResponse(responseText, structuredSummary.tasks.length);
@@ -88,6 +74,34 @@ export async function POST(request: NextRequest) {
   } catch (error) {
     console.error('Error generating summary:', error);
     return NextResponse.json({ error: 'Failed to generate summary' }, { status: 500 });
+  }
+}
+
+async function callClaudeCLI(prompt: string): Promise<string> {
+  try {
+    const { stdout } = await execFileAsync(
+      'claude',
+      [
+        '-p',
+        '--model',
+        'haiku',
+        '--output-format',
+        'text',
+        '--no-session-persistence',
+        '--max-turns',
+        '1',
+        prompt,
+      ],
+      {
+        timeout: 60000,
+        maxBuffer: 1024 * 1024,
+        env: { ...process.env, PATH: `${process.env.HOME}/.local/bin:${process.env.PATH}` },
+      }
+    );
+    return stdout.trim();
+  } catch (error) {
+    const msg = error instanceof Error ? error.message : String(error);
+    throw new Error(`Claude CLI failed: ${msg}`);
   }
 }
 
