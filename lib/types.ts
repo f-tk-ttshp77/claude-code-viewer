@@ -39,7 +39,12 @@ export interface ToolCall {
   timestamp: string;
 }
 
-export type TaskPhase = 'investigation' | 'planning' | 'implementation' | 'verification' | 'immediate';
+export type TaskPhase =
+  | 'investigation'
+  | 'planning'
+  | 'implementation'
+  | 'verification'
+  | 'immediate';
 
 export interface TaskSummary {
   id: number;

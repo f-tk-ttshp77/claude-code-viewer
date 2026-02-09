@@ -3,7 +3,12 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import type { TokenAnalytics } from '@/lib/types';
-import { TokenUsageCard, TokenUsageBarChart, SessionTokenList, formatTokenCount } from './TokenUsageStats';
+import {
+  TokenUsageCard,
+  TokenUsageBarChart,
+  SessionTokenList,
+  formatTokenCount,
+} from './TokenUsageStats';
 
 interface Props {
   weeklyAnalytics: TokenAnalytics;
@@ -33,11 +38,12 @@ export function AnalyticsDashboard({ weeklyAnalytics, monthlyAnalytics, allTimeA
   // Calculate cost estimates based on Claude Sonnet 4.5 API pricing
   // Note: Max Plan users pay $200/month flat rate - this is API equivalent for reference
   const calculateCost = (analytics: TokenAnalytics) => {
-    const { inputTokens, outputTokens, cacheCreationInputTokens, cacheReadInputTokens } = analytics.totalUsage;
+    const { inputTokens, outputTokens, cacheCreationInputTokens, cacheReadInputTokens } =
+      analytics.totalUsage;
     const inputCost = (inputTokens / 1000000) * 3;
     const outputCost = (outputTokens / 1000000) * 15;
     const cacheCreationCost = (cacheCreationInputTokens / 1000000) * 3.75;
-    const cacheReadCost = (cacheReadInputTokens / 1000000) * 0.30;
+    const cacheReadCost = (cacheReadInputTokens / 1000000) * 0.3;
     return inputCost + outputCost + cacheCreationCost + cacheReadCost;
   };
 
@@ -49,7 +55,7 @@ export function AnalyticsDashboard({ weeklyAnalytics, monthlyAnalytics, allTimeA
           <button
             key={period}
             onClick={() => setActivePeriod(period)}
-            className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+            className={`rounded-lg px-4 py-2 text-sm font-medium transition-colors ${
               activePeriod === period
                 ? 'bg-blue-600 text-white'
                 : 'bg-zinc-800 text-zinc-300 hover:bg-zinc-700'
@@ -61,55 +67,49 @@ export function AnalyticsDashboard({ weeklyAnalytics, monthlyAnalytics, allTimeA
       </div>
 
       {/* Overview Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        <div className="bg-zinc-900 rounded-lg p-4 border border-zinc-800">
-          <div className="text-sm text-zinc-400 mb-1">Total Tokens</div>
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        <div className="rounded-lg border border-zinc-800 bg-zinc-900 p-4">
+          <div className="mb-1 text-sm text-zinc-400">Total Tokens</div>
           <div className="text-2xl font-bold text-white">
-            {formatTokenCount(currentAnalytics.totalUsage.inputTokens + currentAnalytics.totalUsage.outputTokens)}
+            {formatTokenCount(
+              currentAnalytics.totalUsage.inputTokens + currentAnalytics.totalUsage.outputTokens
+            )}
           </div>
-          <div className="text-xs text-zinc-500 mt-1">
-            {periodLabels[activePeriod]}
-          </div>
+          <div className="mt-1 text-xs text-zinc-500">{periodLabels[activePeriod]}</div>
         </div>
 
-        <div className="bg-zinc-900 rounded-lg p-4 border border-zinc-800">
-          <div className="text-sm text-zinc-400 mb-1">API Equivalent</div>
+        <div className="rounded-lg border border-zinc-800 bg-zinc-900 p-4">
+          <div className="mb-1 text-sm text-zinc-400">API Equivalent</div>
           <div className="text-2xl font-bold text-emerald-400">
             ${calculateCost(currentAnalytics).toFixed(2)}
           </div>
-          <div className="text-xs text-zinc-500 mt-1">
-            Sonnet 4.5 API pricing
-          </div>
+          <div className="mt-1 text-xs text-zinc-500">Sonnet 4.5 API pricing</div>
         </div>
 
-        <div className="bg-zinc-900 rounded-lg p-4 border border-zinc-800">
-          <div className="text-sm text-zinc-400 mb-1">Sessions</div>
+        <div className="rounded-lg border border-zinc-800 bg-zinc-900 p-4">
+          <div className="mb-1 text-sm text-zinc-400">Sessions</div>
           <div className="text-2xl font-bold text-white">
             {currentAnalytics.sessionStats.length}
           </div>
-          <div className="text-xs text-zinc-500 mt-1">
-            {periodLabels[activePeriod]}
-          </div>
+          <div className="mt-1 text-xs text-zinc-500">{periodLabels[activePeriod]}</div>
         </div>
 
-        <div className="bg-zinc-900 rounded-lg p-4 border border-zinc-800">
-          <div className="text-sm text-zinc-400 mb-1">Cache Savings</div>
+        <div className="rounded-lg border border-zinc-800 bg-zinc-900 p-4">
+          <div className="mb-1 text-sm text-zinc-400">Cache Savings</div>
           <div className="text-2xl font-bold text-green-400">
             {formatTokenCount(currentAnalytics.totalUsage.cacheReadInputTokens)}
           </div>
-          <div className="text-xs text-zinc-500 mt-1">
-            Tokens read from cache
-          </div>
+          <div className="mt-1 text-xs text-zinc-500">Tokens read from cache</div>
         </div>
       </div>
 
       {/* Comparison Summary */}
-      <div className="bg-zinc-900 rounded-lg p-4 border border-zinc-800">
-        <h3 className="text-sm font-medium text-zinc-400 mb-4">Period Comparison</h3>
+      <div className="rounded-lg border border-zinc-800 bg-zinc-900 p-4">
+        <h3 className="mb-4 text-sm font-medium text-zinc-400">Period Comparison</h3>
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
             <thead>
-              <tr className="text-left text-zinc-400 border-b border-zinc-800">
+              <tr className="border-b border-zinc-800 text-left text-zinc-400">
                 <th className="pb-2 pr-4">Period</th>
                 <th className="pb-2 pr-4 text-right">Input</th>
                 <th className="pb-2 pr-4 text-right">Output</th>
@@ -119,29 +119,65 @@ export function AnalyticsDashboard({ weeklyAnalytics, monthlyAnalytics, allTimeA
               </tr>
             </thead>
             <tbody className="text-white">
-              <tr className={`border-b border-zinc-800 ${activePeriod === 'weekly' ? 'bg-blue-900/30' : ''}`}>
+              <tr
+                className={`border-b border-zinc-800 ${activePeriod === 'weekly' ? 'bg-blue-900/30' : ''}`}
+              >
                 <td className="py-2 pr-4">{activePeriod === 'weekly' && '→ '}7 Days</td>
-                <td className="py-2 pr-4 text-right text-blue-400">{formatTokenCount(weeklyAnalytics.totalUsage.inputTokens)}</td>
-                <td className="py-2 pr-4 text-right text-purple-400">{formatTokenCount(weeklyAnalytics.totalUsage.outputTokens)}</td>
-                <td className="py-2 pr-4 text-right">{formatTokenCount(weeklyAnalytics.totalUsage.inputTokens + weeklyAnalytics.totalUsage.outputTokens)}</td>
+                <td className="py-2 pr-4 text-right text-blue-400">
+                  {formatTokenCount(weeklyAnalytics.totalUsage.inputTokens)}
+                </td>
+                <td className="py-2 pr-4 text-right text-purple-400">
+                  {formatTokenCount(weeklyAnalytics.totalUsage.outputTokens)}
+                </td>
+                <td className="py-2 pr-4 text-right">
+                  {formatTokenCount(
+                    weeklyAnalytics.totalUsage.inputTokens + weeklyAnalytics.totalUsage.outputTokens
+                  )}
+                </td>
                 <td className="py-2 pr-4 text-right">{weeklyAnalytics.sessionStats.length}</td>
-                <td className="py-2 text-right text-emerald-400">${calculateCost(weeklyAnalytics).toFixed(2)}</td>
+                <td className="py-2 text-right text-emerald-400">
+                  ${calculateCost(weeklyAnalytics).toFixed(2)}
+                </td>
               </tr>
-              <tr className={`border-b border-zinc-800 ${activePeriod === 'monthly' ? 'bg-blue-900/30' : ''}`}>
+              <tr
+                className={`border-b border-zinc-800 ${activePeriod === 'monthly' ? 'bg-blue-900/30' : ''}`}
+              >
                 <td className="py-2 pr-4">{activePeriod === 'monthly' && '→ '}30 Days</td>
-                <td className="py-2 pr-4 text-right text-blue-400">{formatTokenCount(monthlyAnalytics.totalUsage.inputTokens)}</td>
-                <td className="py-2 pr-4 text-right text-purple-400">{formatTokenCount(monthlyAnalytics.totalUsage.outputTokens)}</td>
-                <td className="py-2 pr-4 text-right">{formatTokenCount(monthlyAnalytics.totalUsage.inputTokens + monthlyAnalytics.totalUsage.outputTokens)}</td>
+                <td className="py-2 pr-4 text-right text-blue-400">
+                  {formatTokenCount(monthlyAnalytics.totalUsage.inputTokens)}
+                </td>
+                <td className="py-2 pr-4 text-right text-purple-400">
+                  {formatTokenCount(monthlyAnalytics.totalUsage.outputTokens)}
+                </td>
+                <td className="py-2 pr-4 text-right">
+                  {formatTokenCount(
+                    monthlyAnalytics.totalUsage.inputTokens +
+                      monthlyAnalytics.totalUsage.outputTokens
+                  )}
+                </td>
                 <td className="py-2 pr-4 text-right">{monthlyAnalytics.sessionStats.length}</td>
-                <td className="py-2 text-right text-emerald-400">${calculateCost(monthlyAnalytics).toFixed(2)}</td>
+                <td className="py-2 text-right text-emerald-400">
+                  ${calculateCost(monthlyAnalytics).toFixed(2)}
+                </td>
               </tr>
               <tr className={activePeriod === 'allTime' ? 'bg-blue-900/30' : ''}>
                 <td className="py-2 pr-4">{activePeriod === 'allTime' && '→ '}All Time</td>
-                <td className="py-2 pr-4 text-right text-blue-400">{formatTokenCount(allTimeAnalytics.totalUsage.inputTokens)}</td>
-                <td className="py-2 pr-4 text-right text-purple-400">{formatTokenCount(allTimeAnalytics.totalUsage.outputTokens)}</td>
-                <td className="py-2 pr-4 text-right">{formatTokenCount(allTimeAnalytics.totalUsage.inputTokens + allTimeAnalytics.totalUsage.outputTokens)}</td>
+                <td className="py-2 pr-4 text-right text-blue-400">
+                  {formatTokenCount(allTimeAnalytics.totalUsage.inputTokens)}
+                </td>
+                <td className="py-2 pr-4 text-right text-purple-400">
+                  {formatTokenCount(allTimeAnalytics.totalUsage.outputTokens)}
+                </td>
+                <td className="py-2 pr-4 text-right">
+                  {formatTokenCount(
+                    allTimeAnalytics.totalUsage.inputTokens +
+                      allTimeAnalytics.totalUsage.outputTokens
+                  )}
+                </td>
                 <td className="py-2 pr-4 text-right">{allTimeAnalytics.sessionStats.length}</td>
-                <td className="py-2 text-right text-emerald-400">${calculateCost(allTimeAnalytics).toFixed(2)}</td>
+                <td className="py-2 text-right text-emerald-400">
+                  ${calculateCost(allTimeAnalytics).toFixed(2)}
+                </td>
               </tr>
             </tbody>
           </table>
@@ -149,44 +185,45 @@ export function AnalyticsDashboard({ weeklyAnalytics, monthlyAnalytics, allTimeA
       </div>
 
       {/* Daily Chart and Token Details */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-        <TokenUsageBarChart dailyStats={currentAnalytics.dailyStats} maxDays={activePeriod === 'weekly' ? 7 : 14} />
+      <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
+        <TokenUsageBarChart
+          dailyStats={currentAnalytics.dailyStats}
+          maxDays={activePeriod === 'weekly' ? 7 : 14}
+        />
         <TokenUsageCard usage={currentAnalytics.totalUsage} title="Token Breakdown" />
       </div>
 
       {/* Recent Sessions */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
         <SessionTokenList sessions={currentAnalytics.sessionStats} maxItems={10} />
 
         {/* Top Projects */}
-        <div className="bg-zinc-900 rounded-lg border border-zinc-800">
-          <div className="p-4 border-b border-zinc-800">
+        <div className="rounded-lg border border-zinc-800 bg-zinc-900">
+          <div className="border-b border-zinc-800 p-4">
             <h3 className="text-sm font-medium text-zinc-400">Top Projects by Token Usage</h3>
           </div>
           <div className="divide-y divide-zinc-800">
-            {getTopProjects(currentAnalytics).map(({ projectName, projectPath, totalTokens, sessionCount }) => (
-              <Link
-                key={projectPath}
-                href={`/?project=${encodeURIComponent(projectPath)}`}
-                className="block p-3 hover:bg-zinc-800/50"
-              >
-                <div className="flex justify-between items-start">
-                  <div className="min-w-0 flex-1">
-                    <div className="text-sm font-medium text-white truncate">
-                      {projectName}
+            {getTopProjects(currentAnalytics).map(
+              ({ projectName, projectPath, totalTokens, sessionCount }) => (
+                <Link
+                  key={projectPath}
+                  href={`/?project=${encodeURIComponent(projectPath)}`}
+                  className="block p-3 hover:bg-zinc-800/50"
+                >
+                  <div className="flex items-start justify-between">
+                    <div className="min-w-0 flex-1">
+                      <div className="truncate text-sm font-medium text-white">{projectName}</div>
+                      <div className="text-xs text-zinc-500">{sessionCount} sessions</div>
                     </div>
-                    <div className="text-xs text-zinc-500">
-                      {sessionCount} sessions
-                    </div>
-                  </div>
-                  <div className="text-right ml-4">
-                    <div className="text-sm font-medium text-white">
-                      {formatTokenCount(totalTokens)}
+                    <div className="ml-4 text-right">
+                      <div className="text-sm font-medium text-white">
+                        {formatTokenCount(totalTokens)}
+                      </div>
                     </div>
                   </div>
-                </div>
-              </Link>
-            ))}
+                </Link>
+              )
+            )}
           </div>
         </div>
       </div>
@@ -195,7 +232,10 @@ export function AnalyticsDashboard({ weeklyAnalytics, monthlyAnalytics, allTimeA
 }
 
 function getTopProjects(analytics: TokenAnalytics) {
-  const projectMap = new Map<string, { projectName: string; projectPath: string; totalTokens: number; sessionCount: number }>();
+  const projectMap = new Map<
+    string,
+    { projectName: string; projectPath: string; totalTokens: number; sessionCount: number }
+  >();
 
   for (const session of analytics.sessionStats) {
     const key = session.projectPath;

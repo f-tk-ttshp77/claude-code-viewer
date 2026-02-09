@@ -16,20 +16,22 @@ function EmptyState() {
   const pathInfo = getDataPathInfo();
 
   return (
-    <div className="bg-amber-50 border border-amber-200 rounded-lg p-6">
-      <h2 className="text-xl font-semibold text-amber-800 mb-4">
+    <div className="rounded-lg border border-amber-200 bg-amber-50 p-6">
+      <h2 className="mb-4 text-xl font-semibold text-amber-800">
         セッションデータが見つかりません
       </h2>
 
       <div className="space-y-4 text-amber-900">
         <div>
-          <p className="font-medium mb-2">現在の設定:</p>
-          <code className="bg-amber-100 px-2 py-1 rounded text-sm block overflow-x-auto">
+          <p className="mb-2 font-medium">現在の設定:</p>
+          <code className="block overflow-x-auto rounded bg-amber-100 px-2 py-1 text-sm">
             {pathInfo.path}
           </code>
-          <p className="text-sm mt-1">
+          <p className="mt-1 text-sm">
             {pathInfo.exists ? (
-              <span className="text-green-700">ディレクトリは存在しますが、セッションファイルがありません</span>
+              <span className="text-green-700">
+                ディレクトリは存在しますが、セッションファイルがありません
+              </span>
             ) : (
               <span className="text-red-700">このディレクトリは存在しません</span>
             )}
@@ -37,8 +39,8 @@ function EmptyState() {
         </div>
 
         <div className="border-t border-amber-200 pt-4">
-          <p className="font-medium mb-2">解決方法:</p>
-          <ol className="list-decimal list-inside space-y-2 text-sm">
+          <p className="mb-2 font-medium">解決方法:</p>
+          <ol className="list-inside list-decimal space-y-2 text-sm">
             <li>
               <strong>Claude Code を使用していることを確認</strong>
               <p className="ml-5 text-amber-700">
@@ -48,15 +50,18 @@ function EmptyState() {
             <li>
               <strong>データの保存場所を確認</strong>
               <p className="ml-5 text-amber-700">
-                デフォルトでは <code className="bg-amber-100 px-1 rounded">~/.claude/projects</code> にデータが保存されます
+                デフォルトでは <code className="rounded bg-amber-100 px-1">~/.claude/projects</code>{' '}
+                にデータが保存されます
               </p>
             </li>
             {!pathInfo.isCustom && (
               <li>
                 <strong>カスタムパスを設定</strong>
                 <p className="ml-5 text-amber-700">
-                  別の場所にデータがある場合は、<code className="bg-amber-100 px-1 rounded">.env</code> ファイルで{' '}
-                  <code className="bg-amber-100 px-1 rounded">CLAUDE_DATA_PATH</code> を設定してください
+                  別の場所にデータがある場合は、
+                  <code className="rounded bg-amber-100 px-1">.env</code> ファイルで{' '}
+                  <code className="rounded bg-amber-100 px-1">CLAUDE_DATA_PATH</code>{' '}
+                  を設定してください
                 </p>
               </li>
             )}
@@ -64,9 +69,9 @@ function EmptyState() {
         </div>
 
         <div className="border-t border-amber-200 pt-4">
-          <p className="font-medium mb-2">環境変数の設定例:</p>
-          <pre className="bg-amber-100 p-3 rounded text-sm overflow-x-auto">
-{`# .env ファイルを作成して以下を追加
+          <p className="mb-2 font-medium">環境変数の設定例:</p>
+          <pre className="overflow-x-auto rounded bg-amber-100 p-3 text-sm">
+            {`# .env ファイルを作成して以下を追加
 CLAUDE_DATA_PATH=/path/to/your/claude/projects`}
           </pre>
         </div>
@@ -86,15 +91,20 @@ export default function Home() {
   }
 
   return (
-    <main className="max-w-4xl mx-auto p-4 sm:p-8">
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6 sm:mb-8">
-        <h1 className="text-2xl sm:text-3xl font-bold">Claude Code Viewer</h1>
+    <main className="mx-auto max-w-4xl p-4 sm:p-8">
+      <div className="mb-6 flex flex-col gap-4 sm:mb-8 sm:flex-row sm:items-center sm:justify-between">
+        <h1 className="text-2xl font-bold sm:text-3xl">Claude Code Viewer</h1>
         <Link
           href="/analytics"
-          className="inline-flex items-center gap-2 px-4 py-2 bg-zinc-800 text-white rounded-lg hover:bg-zinc-700 transition-colors text-sm font-medium"
+          className="inline-flex items-center gap-2 rounded-lg bg-zinc-800 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-zinc-700"
         >
-          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+          <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"
+            />
           </svg>
           Token Analytics
         </Link>
@@ -109,8 +119,8 @@ export default function Home() {
             if (sessions.length === 0) return null;
 
             return (
-              <div key={project} className="bg-white rounded-lg shadow p-6">
-                <h2 className="text-lg font-semibold text-gray-700 mb-4">
+              <div key={project} className="rounded-lg bg-white p-6 shadow">
+                <h2 className="mb-4 text-lg font-semibold text-gray-700">
                   {sessions[0]?.projectName || project}
                 </h2>
 
@@ -125,14 +135,14 @@ export default function Home() {
                       <Link
                         key={session.id}
                         href={`/session/${project}/${session.id}`}
-                        className="block p-3 sm:p-4 rounded-lg border border-gray-200 hover:border-blue-400 hover:bg-blue-50 transition-colors"
+                        className="block rounded-lg border border-gray-200 p-3 transition-colors hover:border-blue-400 hover:bg-blue-50 sm:p-4"
                       >
                         <div className="flex items-start justify-between gap-2">
-                          <div className="flex-1 min-w-0">
-                            <div className="font-medium text-gray-900 truncate">
+                          <div className="min-w-0 flex-1">
+                            <div className="truncate font-medium text-gray-900">
                               {session.summary || 'No summary'}
                             </div>
-                            <div className="text-sm text-gray-500 mt-1">
+                            <div className="mt-1 text-sm text-gray-500">
                               {formatDate(session.lastMessageTime)}
                             </div>
                           </div>
@@ -141,9 +151,7 @@ export default function Home() {
                               <div className="text-sm font-medium text-gray-700">
                                 {formatTokenCount(totalTokens)}
                               </div>
-                              <div className="text-xs text-gray-400">
-                                tokens
-                              </div>
+                              <div className="text-xs text-gray-400">tokens</div>
                             </div>
                           )}
                         </div>

@@ -60,6 +60,7 @@ When you start the app, the home screen displays a list of sessions grouped by p
 Click on a session to view the full conversation.
 
 **What's displayed:**
+
 - User and Claude messages in chronological order
 - Properly formatted markdown (headings, lists, tables, etc.)
 - Code blocks with syntax highlighting

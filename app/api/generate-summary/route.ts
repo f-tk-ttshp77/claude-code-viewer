@@ -20,10 +20,7 @@ export async function POST(request: NextRequest) {
     const { projectName, sessionId } = await request.json();
 
     if (!projectName || !sessionId) {
-      return NextResponse.json(
-        { error: 'Missing projectName or sessionId' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'Missing projectName or sessionId' }, { status: 400 });
     }
 
     // Check cache first
@@ -35,10 +32,7 @@ export async function POST(request: NextRequest) {
     // Get structured summary data
     const structuredSummary = getSessionSummary(projectName, sessionId);
     if (!structuredSummary) {
-      return NextResponse.json(
-        { error: 'Session not found' },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: 'Session not found' }, { status: 404 });
     }
 
     // Build prompt for Claude
@@ -71,10 +65,7 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ summary: aiSummary, fromCache: false });
   } catch (error) {
     console.error('Error generating summary:', error);
-    return NextResponse.json(
-      { error: 'Failed to generate summary' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Failed to generate summary' }, { status: 500 });
   }
 }
 

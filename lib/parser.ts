@@ -1,6 +1,19 @@
 import fs from 'fs';
 import path from 'path';
-import type { Session, Message, RawMessage, ContentItem, SessionSummary, TaskSummary, TaskPhase, ToolCall, TokenUsage, SessionTokenStats, DailyTokenStats, TokenAnalytics } from './types';
+import type {
+  Session,
+  Message,
+  RawMessage,
+  ContentItem,
+  SessionSummary,
+  TaskSummary,
+  TaskPhase,
+  ToolCall,
+  TokenUsage,
+  SessionTokenStats,
+  DailyTokenStats,
+  TokenAnalytics,
+} from './types';
 
 function getClaudePath(): string {
   if (process.env.CLAUDE_DATA_PATH) {
@@ -81,9 +94,9 @@ export function getSessions(projectName: string): Session[] {
     return [];
   }
 
-  const files = fs.readdirSync(projectPath).filter(
-    (f) => f.endsWith('.jsonl') && !f.startsWith('agent-')
-  );
+  const files = fs
+    .readdirSync(projectPath)
+    .filter((f) => f.endsWith('.jsonl') && !f.startsWith('agent-'));
 
   const sessions: Session[] = [];
 
@@ -276,7 +289,11 @@ export function getSessionSummary(projectName: string, sessionId: string): Sessi
           const textContent = extractUserText(data.message.content);
 
           // Skip tool results and system messages
-          if (textContent && !textContent.startsWith('<function_results>') && !textContent.startsWith('<system-reminder>')) {
+          if (
+            textContent &&
+            !textContent.startsWith('<function_results>') &&
+            !textContent.startsWith('<system-reminder>')
+          ) {
             // Save previous task
             if (currentTask) {
               currentTask.phases = detectPhases(currentTask.toolCalls);
@@ -397,13 +414,18 @@ function extractUserText(content: string | (ContentItem | RawToolUse)[]): string
   return '';
 }
 
-function extractToolCalls(content: string | (ContentItem | RawToolUse)[], timestamp: string): ToolCall[] {
+function extractToolCalls(
+  content: string | (ContentItem | RawToolUse)[],
+  timestamp: string
+): ToolCall[] {
   if (typeof content === 'string') {
     return [];
   }
   if (Array.isArray(content)) {
     return content
-      .filter((item): item is RawToolUse => item.type === 'tool_use' && 'name' in item && !!item.name)
+      .filter(
+        (item): item is RawToolUse => item.type === 'tool_use' && 'name' in item && !!item.name
+      )
       .map((item) => ({
         name: item.name,
         input: item.input,
@@ -416,24 +438,27 @@ function extractToolCalls(content: string | (ContentItem | RawToolUse)[], timest
 function detectPhases(toolCalls: ToolCall[]): TaskPhase[] {
   const phases: TaskPhase[] = [];
 
-  const hasInvestigation = toolCalls.some((t) =>
-    ['Read', 'Glob', 'Grep', 'Task'].includes(t.name) &&
-    (t.name !== 'Task' || (t.input as Record<string, unknown>)?.subagent_type === 'Explore')
+  const hasInvestigation = toolCalls.some(
+    (t) =>
+      ['Read', 'Glob', 'Grep', 'Task'].includes(t.name) &&
+      (t.name !== 'Task' || (t.input as Record<string, unknown>)?.subagent_type === 'Explore')
   );
 
-  const hasPlanning = toolCalls.some((t) =>
-    t.name === 'TodoWrite' ||
-    (t.name === 'Task' && (t.input as Record<string, unknown>)?.subagent_type === 'Plan')
+  const hasPlanning = toolCalls.some(
+    (t) =>
+      t.name === 'TodoWrite' ||
+      (t.name === 'Task' && (t.input as Record<string, unknown>)?.subagent_type === 'Plan')
   );
 
-  const hasImplementation = toolCalls.some((t) =>
-    ['Edit', 'Write'].includes(t.name)
-  );
+  const hasImplementation = toolCalls.some((t) => ['Edit', 'Write'].includes(t.name));
 
-  const hasVerification = toolCalls.some((t) =>
-    t.name === 'Bash' &&
-    typeof (t.input as Record<string, unknown>)?.command === 'string' &&
-    /(npm\s+(test|run\s+build|run\s+lint)|pytest|jest|cargo\s+test)/.test((t.input as Record<string, unknown>)?.command as string)
+  const hasVerification = toolCalls.some(
+    (t) =>
+      t.name === 'Bash' &&
+      typeof (t.input as Record<string, unknown>)?.command === 'string' &&
+      /(npm\s+(test|run\s+build|run\s+lint)|pytest|jest|cargo\s+test)/.test(
+        (t.input as Record<string, unknown>)?.command as string
+      )
   );
 
   if (hasInvestigation) phases.push('investigation');
@@ -488,7 +513,10 @@ interface RawMessageWithUsage {
   };
 }
 
-export function getSessionTokenStats(projectName: string, sessionId: string): SessionTokenStats | null {
+export function getSessionTokenStats(
+  projectName: string,
+  sessionId: string
+): SessionTokenStats | null {
   const claudePath = getClaudePath();
   const filePath = path.join(claudePath, projectName, `${sessionId}.jsonl`);
 
@@ -559,9 +587,9 @@ export function getAllTokenStats(): SessionTokenStats[] {
 
     if (!fs.existsSync(projectPath)) continue;
 
-    const files = fs.readdirSync(projectPath).filter(
-      (f) => f.endsWith('.jsonl') && !f.startsWith('agent-')
-    );
+    const files = fs
+      .readdirSync(projectPath)
+      .filter((f) => f.endsWith('.jsonl') && !f.startsWith('agent-'));
 
     for (const file of files) {
       const sessionId = path.basename(file, '.jsonl');

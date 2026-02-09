@@ -24,14 +24,15 @@ export function SessionContent({ messages, summary, projectName, sessionId, toke
       {(activeTab) => (
         <>
           {activeTab === 'conversation' && (
-            <div className="bg-white rounded-lg shadow">
+            <div className="rounded-lg bg-white shadow">
               {messages.length === 0 ? (
                 <p className="p-6 text-gray-500">No messages</p>
               ) : (
                 <div className="divide-y divide-gray-100">
                   {messages.map((message, index) => {
                     const prevMessage = index > 0 ? messages[index - 1] : null;
-                    const prevHasCommandMessage = prevMessage?.content.includes('<command-message>');
+                    const prevHasCommandMessage =
+                      prevMessage?.content.includes('<command-message>');
                     const commandMatch = prevHasCommandMessage
                       ? prevMessage?.content.match(/<command-name>(\w+)<\/command-name>/) ||
                         prevMessage?.content.match(/^\/(\w+)/)
@@ -47,7 +48,7 @@ export function SessionContent({ messages, summary, projectName, sessionId, toke
 
                     return (
                       <div key={message.uuid} className="p-4 sm:p-6">
-                        <div className="flex items-center gap-2 mb-2">
+                        <div className="mb-2 flex items-center gap-2">
                           <span
                             className={`text-sm font-medium ${
                               message.type === 'user' ? 'text-blue-600' : 'text-green-600'
@@ -75,7 +76,7 @@ export function SessionContent({ messages, summary, projectName, sessionId, toke
           )}
 
           {activeTab === 'summary' && (
-            <div className="bg-white rounded-lg shadow p-4 sm:p-6">
+            <div className="rounded-lg bg-white p-4 shadow sm:p-6">
               {summary ? (
                 <SessionSummaryView
                   summary={summary}
