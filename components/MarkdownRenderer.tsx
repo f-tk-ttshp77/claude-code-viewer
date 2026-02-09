@@ -12,7 +12,7 @@ interface Props {
 
 export function MarkdownRenderer({ content }: Props) {
   return (
-    <div className="prose prose-sm max-w-none">
+    <div className="prose prose-sm max-w-none dark:prose-invert">
       <ReactMarkdown
         remarkPlugins={[remarkGfm]}
         components={{
@@ -35,7 +35,7 @@ export function MarkdownRenderer({ content }: Props) {
           table({ children }) {
             return (
               <div className="overflow-x-auto">
-                <table className="min-w-full border-collapse border border-gray-300">
+                <table className="min-w-full border-collapse border border-gray-300 dark:border-gray-600">
                   {children}
                 </table>
               </div>
@@ -43,11 +43,15 @@ export function MarkdownRenderer({ content }: Props) {
           },
           th({ children }) {
             return (
-              <th className="border border-gray-300 bg-gray-100 px-4 py-2 text-left">{children}</th>
+              <th className="border border-gray-300 bg-gray-100 px-4 py-2 text-left dark:border-gray-600 dark:bg-gray-800">
+                {children}
+              </th>
             );
           },
           td({ children }) {
-            return <td className="border border-gray-300 px-4 py-2">{children}</td>;
+            return (
+              <td className="border border-gray-300 px-4 py-2 dark:border-gray-600">{children}</td>
+            );
           },
         }}
       >

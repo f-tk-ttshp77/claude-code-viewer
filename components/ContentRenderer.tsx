@@ -25,18 +25,20 @@ export function ContentRenderer({ content, isCommandExpansion, commandName }: Pr
         <div key={index}>
           {segment.type === 'text' && <MarkdownRenderer content={segment.content} />}
           {segment.type === 'command-message' && (
-            <div className="my-3 rounded-r border-l-4 border-blue-400 bg-blue-50 p-3">
-              <div className="mb-1 text-xs font-medium text-blue-600">コマンドメッセージ</div>
-              <div className="text-blue-800">{segment.content}</div>
+            <div className="my-3 rounded-r border-l-4 border-blue-400 bg-blue-50 p-3 dark:border-blue-500 dark:bg-blue-900/30">
+              <div className="mb-1 text-xs font-medium text-blue-600 dark:text-blue-400">
+                コマンドメッセージ
+              </div>
+              <div className="text-blue-800 dark:text-blue-200">{segment.content}</div>
             </div>
           )}
           {segment.type === 'command-name' && (
-            <span className="inline-block rounded bg-purple-100 px-2 py-1 font-mono text-sm text-purple-700">
+            <span className="inline-block rounded bg-purple-100 px-2 py-1 font-mono text-sm text-purple-700 dark:bg-purple-900/50 dark:text-purple-300">
               {segment.content}
             </span>
           )}
           {segment.type === 'command-args' && (
-            <span className="ml-1 inline-block rounded bg-gray-100 px-2 py-1 font-mono text-sm text-gray-700">
+            <span className="ml-1 inline-block rounded bg-gray-100 px-2 py-1 font-mono text-sm text-gray-700 dark:bg-gray-700 dark:text-gray-300">
               {segment.content}
             </span>
           )}
@@ -151,7 +153,7 @@ function FunctionCallsRenderer({ content }: { content: string }) {
 
   if (invokes.length === 0) {
     return (
-      <div className="my-3 rounded border border-yellow-200 bg-yellow-50 p-3 font-mono text-sm">
+      <div className="my-3 rounded border border-yellow-200 bg-yellow-50 p-3 font-mono text-sm dark:border-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-200">
         {content}
       </div>
     );
@@ -160,17 +162,20 @@ function FunctionCallsRenderer({ content }: { content: string }) {
   return (
     <div className="my-3 space-y-2">
       {invokes.map((invoke, idx) => (
-        <div key={idx} className="overflow-hidden rounded-lg border border-orange-200">
-          <div className="flex items-center gap-2 border-b border-orange-200 bg-orange-50 px-3 py-2">
-            <span className="text-orange-600">🔧</span>
-            <span className="font-medium text-orange-800">{invoke.name}</span>
+        <div
+          key={idx}
+          className="overflow-hidden rounded-lg border border-orange-200 dark:border-orange-800"
+        >
+          <div className="flex items-center gap-2 border-b border-orange-200 bg-orange-50 px-3 py-2 dark:border-orange-800 dark:bg-orange-900/30">
+            <span className="text-orange-600 dark:text-orange-400">🔧</span>
+            <span className="font-medium text-orange-800 dark:text-orange-300">{invoke.name}</span>
           </div>
           {invoke.params.length > 0 && (
-            <div className="bg-white p-3 text-sm">
+            <div className="bg-white p-3 text-sm dark:bg-gray-800">
               {invoke.params.map((param, pIdx) => (
                 <div key={pIdx} className="mb-2 last:mb-0">
-                  <div className="mb-1 text-xs text-gray-500">{param.name}:</div>
-                  <pre className="overflow-x-auto whitespace-pre-wrap break-all rounded bg-gray-50 p-2 text-xs">
+                  <div className="mb-1 text-xs text-gray-500 dark:text-gray-400">{param.name}:</div>
+                  <pre className="overflow-x-auto whitespace-pre-wrap break-all rounded bg-gray-50 p-2 text-xs dark:bg-gray-900 dark:text-gray-300">
                     {param.value.length > 500 ? param.value.slice(0, 500) + '...' : param.value}
                   </pre>
                 </div>
@@ -188,12 +193,12 @@ function FunctionResultsRenderer({ content }: { content: string }) {
   const truncated = content.length > 1000 ? content.slice(0, 1000) + '\n... (truncated)' : content;
 
   return (
-    <div className="my-3 overflow-hidden rounded-lg border border-green-200">
-      <div className="flex items-center gap-2 border-b border-green-200 bg-green-50 px-3 py-2">
-        <span className="text-green-600">✓</span>
-        <span className="font-medium text-green-800">実行結果</span>
+    <div className="my-3 overflow-hidden rounded-lg border border-green-200 dark:border-green-800">
+      <div className="flex items-center gap-2 border-b border-green-200 bg-green-50 px-3 py-2 dark:border-green-800 dark:bg-green-900/30">
+        <span className="text-green-600 dark:text-green-400">✓</span>
+        <span className="font-medium text-green-800 dark:text-green-300">実行結果</span>
       </div>
-      <pre className="max-h-48 overflow-x-auto overflow-y-auto whitespace-pre-wrap break-all bg-white p-3 text-sm">
+      <pre className="max-h-48 overflow-x-auto overflow-y-auto whitespace-pre-wrap break-all bg-white p-3 text-sm dark:bg-gray-800 dark:text-gray-300">
         {truncated}
       </pre>
     </div>

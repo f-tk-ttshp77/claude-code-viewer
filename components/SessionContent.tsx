@@ -24,11 +24,11 @@ export function SessionContent({ messages, summary, projectName, sessionId, toke
       {(activeTab) => (
         <>
           {activeTab === 'conversation' && (
-            <div className="rounded-lg bg-white shadow">
+            <div>
               {messages.length === 0 ? (
-                <p className="p-6 text-gray-500">No messages</p>
+                <p className="p-6 text-gray-500 dark:text-gray-400">No messages</p>
               ) : (
-                <div className="divide-y divide-gray-100">
+                <div className="flex flex-col gap-6">
                   {messages.map((message, index) => {
                     const prevMessage = index > 0 ? messages[index - 1] : null;
                     const prevHasCommandMessage =
@@ -46,21 +46,30 @@ export function SessionContent({ messages, summary, projectName, sessionId, toke
                     );
                     const commandName = commandMatch ? commandMatch[1] : 'command';
 
+                    const isUser = message.type === 'user';
+
                     return (
-                      <div key={message.uuid} className="p-4 sm:p-6">
+                      <div
+                        key={message.uuid}
+                        className={`rounded-lg p-4 shadow ${
+                          isUser ? 'bg-blue-50 dark:bg-blue-900/30' : 'bg-white dark:bg-gray-800'
+                        }`}
+                      >
                         <div className="mb-2 flex items-center gap-2">
                           <span
                             className={`text-sm font-medium ${
-                              message.type === 'user' ? 'text-blue-600' : 'text-green-600'
+                              isUser
+                                ? 'text-blue-600 dark:text-blue-400'
+                                : 'text-green-600 dark:text-green-400'
                             }`}
                           >
-                            {message.type === 'user' ? '👤 User' : '🤖 Claude'}
+                            {isUser ? '👤 User' : '🤖 Claude'}
                           </span>
-                          <span className="text-xs text-gray-400">
+                          <span className="text-xs text-gray-400 dark:text-gray-500">
                             {formatTime(message.timestamp)}
                           </span>
                         </div>
-                        <div className="text-gray-800">
+                        <div className="text-gray-800 dark:text-gray-200">
                           <ContentRenderer
                             content={message.content}
                             isCommandExpansion={isCommandExpansion}
@@ -76,7 +85,7 @@ export function SessionContent({ messages, summary, projectName, sessionId, toke
           )}
 
           {activeTab === 'summary' && (
-            <div className="rounded-lg bg-white p-4 shadow sm:p-6">
+            <div className="rounded-lg bg-white p-4 shadow dark:bg-gray-800 sm:p-6">
               {summary ? (
                 <SessionSummaryView
                   summary={summary}
@@ -85,7 +94,7 @@ export function SessionContent({ messages, summary, projectName, sessionId, toke
                   tokenStats={tokenStats}
                 />
               ) : (
-                <p className="text-gray-500">サマリーを生成できませんでした</p>
+                <p className="text-gray-500 dark:text-gray-400">サマリーを生成できませんでした</p>
               )}
             </div>
           )}

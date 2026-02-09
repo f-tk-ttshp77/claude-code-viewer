@@ -102,3 +102,20 @@ export interface TokenAnalytics {
   periodStart: string;
   periodEnd: string;
 }
+
+// Insights types
+export interface InsightDetail {
+  category: string;
+  score: number; // 0-100
+  finding: string; // 日本語の所見
+}
+
+export interface InsightsResult {
+  overallScore: number; // 3軸の加重平均
+  bestPractice: { score: number; details: InsightDetail[] };
+  instructionQuality: { score: number; details: InsightDetail[] };
+  workDensity: { score: number; details: InsightDetail[] };
+  recommendations: string[]; // Top 5 改善アドバイス（日本語）
+  analyzedSessions: number;
+  analyzedPeriod: { from: string; to: string };
+}
