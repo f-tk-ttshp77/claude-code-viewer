@@ -1,6 +1,6 @@
-import Link from 'next/link';
 import { getTokenAnalytics } from '@/lib/parser';
 import { AnalyticsDashboard } from '@/components/AnalyticsDashboard';
+import { Breadcrumb } from '@/components/Breadcrumb';
 
 export default function AnalyticsPage() {
   // Get analytics for different periods
@@ -12,11 +12,11 @@ export default function AnalyticsPage() {
     <main className="mx-auto max-w-6xl p-4 sm:p-8">
       {/* Header */}
       <div className="mb-6">
-        <Link href="/" className="text-sm text-blue-500 hover:underline">
-          ← Back
-        </Link>
-        <h1 className="mt-2 text-2xl font-bold">Token Usage Analytics</h1>
-        <p className="mt-1 text-sm text-gray-500">Claude Code token usage statistics</p>
+        <Breadcrumb />
+        <h1 className="mt-2 text-2xl font-bold dark:text-gray-100">Token Usage Analytics</h1>
+        <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
+          Claude Code token usage statistics
+        </p>
       </div>
 
       <AnalyticsDashboard

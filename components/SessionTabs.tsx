@@ -40,7 +40,10 @@ export function SessionTabs({ tabs, children }: SessionTabsProps) {
   return (
     <div>
       {/* Tab buttons */}
-      <div role="tablist" className="mb-4 flex border-b border-gray-200">
+      <div
+        role="tablist"
+        className="sticky top-14 z-30 -mx-4 mb-4 flex border-b border-gray-200 bg-gray-50 px-4 dark:border-gray-700 dark:bg-gray-900 sm:-mx-8 sm:px-8"
+      >
         {tabs.map((tab, index) => (
           <button
             key={tab.id}
@@ -55,8 +58,8 @@ export function SessionTabs({ tabs, children }: SessionTabsProps) {
             onKeyDown={(e) => handleKeyDown(e, index)}
             className={`px-4 py-2 text-sm font-medium transition-colors ${
               activeTab === tab.id
-                ? 'border-b-2 border-blue-600 text-blue-600'
-                : 'text-gray-500 hover:text-gray-700'
+                ? 'border-b-2 border-blue-600 text-blue-600 dark:border-blue-400 dark:text-blue-400'
+                : 'text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300'
             }`}
           >
             {tab.label}

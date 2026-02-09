@@ -57,9 +57,9 @@ export function SessionSummaryView({ summary, projectName, sessionId, tokenStats
   return (
     <div className="space-y-6">
       {/* AI Summary Section */}
-      <div className="rounded-lg border border-purple-100 bg-gradient-to-r from-purple-50 to-blue-50 p-4">
+      <div className="rounded-lg border border-purple-100 bg-gradient-to-r from-purple-50 to-blue-50 p-4 dark:border-purple-800 dark:from-purple-900/30 dark:to-blue-900/30">
         <div className="mb-3 flex items-center justify-between">
-          <h3 className="text-sm font-semibold text-purple-800">AI要約</h3>
+          <h3 className="text-sm font-semibold text-purple-800 dark:text-purple-300">AI要約</h3>
           <button
             onClick={generateSummary}
             disabled={isGenerating}
@@ -69,19 +69,19 @@ export function SessionSummaryView({ summary, projectName, sessionId, tokenStats
           </button>
         </div>
 
-        {error && <p className="mb-3 text-sm text-red-600">{error}</p>}
+        {error && <p className="mb-3 text-sm text-red-600 dark:text-red-400">{error}</p>}
 
         {aiSummary ? (
           <div className="space-y-3">
-            <div className="rounded-lg border border-purple-100 bg-white p-3">
-              <p className="text-sm text-gray-800">{aiSummary.sessionSummary}</p>
-              <p className="mt-2 text-xs text-gray-400">
+            <div className="rounded-lg border border-purple-100 bg-white p-3 dark:border-purple-800 dark:bg-gray-800">
+              <p className="text-sm text-gray-800 dark:text-gray-200">{aiSummary.sessionSummary}</p>
+              <p className="mt-2 text-xs text-gray-400 dark:text-gray-500">
                 生成日時: {new Date(aiSummary.generatedAt).toLocaleString('ja-JP')}
               </p>
             </div>
           </div>
         ) : (
-          <p className="text-sm text-purple-600">
+          <p className="text-sm text-purple-600 dark:text-purple-400">
             「要約を生成」をクリックすると、AIがセッション内容を要約します
           </p>
         )}
@@ -89,8 +89,10 @@ export function SessionSummaryView({ summary, projectName, sessionId, tokenStats
 
       {/* Stats Overview */}
       <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-        <div className="rounded-lg bg-gray-50 p-4">
-          <h3 className="mb-3 text-sm font-semibold text-gray-700">セッション統計</h3>
+        <div className="rounded-lg bg-gray-50 p-4 dark:bg-gray-700/50">
+          <h3 className="mb-3 text-sm font-semibold text-gray-700 dark:text-gray-300">
+            セッション統計
+          </h3>
           <div className="grid grid-cols-3 gap-3 sm:grid-cols-6">
             <StatItem emoji="📖" label="読込" value={summary.stats.filesRead} />
             <StatItem emoji="✏️" label="変更" value={summary.stats.filesModified} />
@@ -112,7 +114,7 @@ export function SessionSummaryView({ summary, projectName, sessionId, tokenStats
 
       {/* Tasks */}
       <div>
-        <h3 className="mb-3 text-sm font-semibold text-gray-700">
+        <h3 className="mb-3 text-sm font-semibold text-gray-700 dark:text-gray-300">
           タスク一覧（{summary.totalTasks}件）
         </h3>
         <div className="space-y-4">
@@ -120,24 +122,31 @@ export function SessionSummaryView({ summary, projectName, sessionId, tokenStats
             const taskAiSummary = aiSummary?.taskSummaries.find((t) => t.id === task.id);
 
             return (
-              <div key={task.id} className="rounded-lg border border-gray-200 bg-white p-4">
+              <div
+                key={task.id}
+                className="rounded-lg border border-gray-200 bg-white p-4 dark:border-gray-700 dark:bg-gray-800"
+              >
                 {/* Task header */}
                 <div className="mb-3 flex items-start gap-3">
-                  <span className="flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-full bg-blue-100 text-xs font-medium text-blue-600">
+                  <span className="flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-full bg-blue-100 text-xs font-medium text-blue-600 dark:bg-blue-900/50 dark:text-blue-400">
                     {index + 1}
                   </span>
                   <div className="min-w-0 flex-1">
-                    <p className="break-words text-sm text-gray-800">
+                    <p className="break-words text-sm text-gray-800 dark:text-gray-200">
                       {task.userMessage || '(メッセージなし)'}
                     </p>
-                    <p className="mt-1 text-xs text-gray-400">{formatTime(task.timestamp)}</p>
+                    <p className="mt-1 text-xs text-gray-400 dark:text-gray-500">
+                      {formatTime(task.timestamp)}
+                    </p>
                   </div>
                 </div>
 
                 {/* AI Summary for task */}
                 {taskAiSummary?.summary && (
-                  <div className="mb-3 rounded border-l-2 border-purple-400 bg-purple-50 p-2">
-                    <p className="text-xs text-purple-800">{taskAiSummary.summary}</p>
+                  <div className="mb-3 rounded border-l-2 border-purple-400 bg-purple-50 p-2 dark:bg-purple-900/30">
+                    <p className="text-xs text-purple-800 dark:text-purple-300">
+                      {taskAiSummary.summary}
+                    </p>
                   </div>
                 )}
 
@@ -146,7 +155,7 @@ export function SessionSummaryView({ summary, projectName, sessionId, tokenStats
                   {task.phases.map((phase) => (
                     <span
                       key={phase}
-                      className="inline-flex items-center gap-1 rounded bg-gray-100 px-2 py-1 text-xs text-gray-700"
+                      className="inline-flex items-center gap-1 rounded bg-gray-100 px-2 py-1 text-xs text-gray-700 dark:bg-gray-700 dark:text-gray-300"
                     >
                       {phaseLabels[phase].emoji} {phaseLabels[phase].label}
                     </span>
@@ -179,8 +188,8 @@ function StatItem({ emoji, label, value }: { emoji: string; label: string; value
   return (
     <div className="flex flex-col items-center text-center">
       <span className="text-lg">{emoji}</span>
-      <span className="text-xs text-gray-600">{label}</span>
-      <span className="text-sm font-bold text-gray-800">{value}</span>
+      <span className="text-xs text-gray-600 dark:text-gray-400">{label}</span>
+      <span className="text-sm font-bold text-gray-800 dark:text-gray-200">{value}</span>
     </div>
   );
 }
@@ -192,15 +201,15 @@ function FileList({ emoji, label, files }: { emoji: string; label: string; files
   return (
     <div className="flex items-start gap-2">
       <span className="flex-shrink-0">{emoji}</span>
-      <span className="flex-shrink-0 text-gray-500">{label}:</span>
-      <span className="break-all text-gray-700">
+      <span className="flex-shrink-0 text-gray-500 dark:text-gray-400">{label}:</span>
+      <span className="break-all text-gray-700 dark:text-gray-300">
         {displayFiles.map((file, i) => (
           <span key={file}>
-            <code className="rounded bg-gray-100 px-1">{file}</code>
+            <code className="rounded bg-gray-100 px-1 dark:bg-gray-700">{file}</code>
             {i < displayFiles.length - 1 && ', '}
           </span>
         ))}
-        {remaining > 0 && <span className="text-gray-400"> +{remaining}件</span>}
+        {remaining > 0 && <span className="text-gray-400 dark:text-gray-500"> +{remaining}件</span>}
       </span>
     </div>
   );
@@ -213,15 +222,15 @@ function CommandList({ commands }: { commands: string[] }) {
   return (
     <div className="flex items-start gap-2">
       <span className="flex-shrink-0">⚡</span>
-      <span className="flex-shrink-0 text-gray-500">実行:</span>
-      <span className="break-all text-gray-700">
+      <span className="flex-shrink-0 text-gray-500 dark:text-gray-400">実行:</span>
+      <span className="break-all text-gray-700 dark:text-gray-300">
         {displayCommands.map((cmd, i) => (
           <span key={i}>
-            <code className="rounded bg-gray-100 px-1">{cmd}</code>
+            <code className="rounded bg-gray-100 px-1 dark:bg-gray-700">{cmd}</code>
             {i < displayCommands.length - 1 && ', '}
           </span>
         ))}
-        {remaining > 0 && <span className="text-gray-400"> +{remaining}件</span>}
+        {remaining > 0 && <span className="text-gray-400 dark:text-gray-500"> +{remaining}件</span>}
       </span>
     </div>
   );
